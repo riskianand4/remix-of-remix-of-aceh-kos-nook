@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
+    "@vitejs/plugin-react-swc": "^4.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lovable-tagger": "^1.1.13",
@@ -16,6 +17,7 @@
     "react-router-dom": "^7.11.0",
     "recharts": "^3.6.0",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vite": "^7.3.0"
   }
 }
