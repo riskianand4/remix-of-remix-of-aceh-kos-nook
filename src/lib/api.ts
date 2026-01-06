@@ -99,4 +99,21 @@ export const sentimentApi = {
     const data = await response.json();
     return { data, isLive: true };
   },
+
+  // Get word cloud data
+  async getWordCloud(sentiment?: string): Promise<{ data: Array<{ text: string; value: number }>; isLive: boolean }> {
+    const url = sentiment && sentiment !== 'all' 
+      ? `${API_BASE}/api/wordcloud?sentiment=${sentiment}` 
+      : `${API_BASE}/api/wordcloud`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error('Gagal mengambil data wordcloud');
+    }
+    
+    isBackendConnected = true;
+    const data = await response.json();
+    return { data, isLive: true };
+  },
 };

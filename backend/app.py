@@ -169,6 +169,52 @@ def get_evaluation():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/wordcloud')
+def get_wordcloud():
+    """Get word frequency data for wordcloud visualization"""
+    try:
+        sentiment = request.args.get('sentiment', None)
+        data = pd.read_csv(get_data_path('data_sentimen.csv'))
+        
+        # Filter by sentiment if specified
+        if sentiment and sentiment in ['positif', 'negatif', 'netral']:
+            data = data[data['label'] == sentiment]
+        
+        # Combine all texts
+        all_text = ' '.join(data['teks'].astype(str).tolist())
+        
+        # Simple tokenization and word counting
+        words = all_text.lower().split()
+        
+        # Indonesian stopwords
+        stopwords = {
+            'yang', 'dan', 'di', 'ke', 'dari', 'ini', 'itu', 'dengan', 'untuk',
+            'pada', 'adalah', 'tidak', 'ada', 'juga', 'akan', 'atau', 'sudah',
+            'bisa', 'saya', 'kami', 'kita', 'mereka', 'dia', 'ia', 'anda',
+            'sangat', 'lebih', 'hanya', 'karena', 'oleh', 'tersebut', 'dapat',
+            'telah', 'dalam', 'sebagai', 'saat', 'setelah', 'jika', 'maka',
+            'tetapi', 'namun', 'bahwa', 'seperti', 'lagi', 'masih', 'nya',
+            'ya', 'yg', 'dgn', 'utk', 'sm', 'bgt', 'gak', 'ga', 'tdk', 'dr',
+            'rt', 'amp', 'http', 'https', 'co', 'www', 'com', 'a', 'b', 'c'
+        }
+        
+        # Count words (exclude stopwords and short words)
+        word_count = {}
+        for word in words:
+            # Clean word (remove punctuation)
+            clean_word = ''.join(c for c in word if c.isalnum())
+            if len(clean_word) > 2 and clean_word not in stopwords:
+                word_count[clean_word] = word_count.get(clean_word, 0) + 1
+        
+        # Sort by frequency and get top 50
+        sorted_words = sorted(word_count.items(), key=lambda x: x[1], reverse=True)[:50]
+        
+        result = [{'text': word, 'value': count} for word, count in sorted_words]
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/health')
 def health():
     """Health check endpoint"""

@@ -2,6 +2,7 @@ import { BarChart3, ThumbsUp, ThumbsDown, Minus, TrendingUp } from 'lucide-react
 import { StatCard } from '@/components/dashboard/stat-card';
 import { SentimentChart } from '@/components/dashboard/sentiment-chart';
 import { MentionFeed } from '@/components/dashboard/mention-feed';
+import { WordCloud } from '@/components/dashboard/word-cloud';
 import { useSentimentStats, useMentions, safePercent } from '@/hooks/use-sentiment-api';
 import { BackendStatusBadge } from '@/components/layout/backend-status';
 
@@ -85,8 +86,11 @@ export default function Dashboard() {
       {/* Charts & Feed */}
       <div className="grid gap-6 lg:grid-cols-2">
         <SentimentChart stats={stats} />
-        <MentionFeed mentions={mentions} loading={mentionsLoading} />
+        <WordCloud />
       </div>
+
+      {/* Mention Feed - Full Width */}
+      <MentionFeed mentions={mentions} loading={mentionsLoading} />
     </div>
   );
 }
