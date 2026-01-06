@@ -2,9 +2,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pickle
 import pandas as pd
+import numpy as np
 import os
 from datetime import datetime, timedelta
 import random
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
 
 app = Flask(__name__)
 CORS(app)
@@ -120,6 +123,48 @@ def get_mentions():
         return jsonify({
             'data': mentions,
             'total': len(data)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/evaluation')
+def get_evaluation():
+    """Get model evaluation metrics"""
+    try:
+        data = pd.read_csv(get_data_path('data_sentimen.csv'))
+        
+        X = data['teks']
+        y = data['label']
+        
+        # Split data for evaluation
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
+        
+        # Transform and predict
+        X_test_vec = vectorizer.transform(X_test)
+        y_pred = model.predict(X_test_vec)
+        
+        # Calculate metrics
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+        recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+        f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+        
+        # Confusion matrix
+        labels = ['negatif', 'netral', 'positif']
+        cm = confusion_matrix(y_test, y_pred, labels=labels)
+        
+        # Classification report
+        report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
+        
+        return jsonify({
+            'accuracy': float(accuracy),
+            'precision': float(precision),
+            'recall': float(recall),
+            'f1_score': float(f1),
+            'confusion_matrix': cm.tolist(),
+            'classification_report': report
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500

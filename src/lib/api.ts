@@ -1,4 +1,4 @@
-import type { SentimentStats, Mention, AnalysisResult, DatasetItem } from '@/types/sentiment';
+import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult } from '@/types/sentiment';
 
 // URL backend Flask - sesuaikan dengan URL server Anda
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -85,5 +85,18 @@ export const sentimentApi = {
       isBackendConnected = false;
       return false;
     }
+  },
+
+  // Get model evaluation metrics
+  async getEvaluation(): Promise<{ data: EvaluationResult; isLive: boolean }> {
+    const response = await fetch(`${API_BASE}/api/evaluation`);
+    
+    if (!response.ok) {
+      throw new Error('Gagal mengambil data evaluasi');
+    }
+    
+    isBackendConnected = true;
+    const data = await response.json();
+    return { data, isLive: true };
   },
 };
