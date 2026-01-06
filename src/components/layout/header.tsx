@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { BarChart3, FileText, Search, Info, Menu, X } from 'lucide-react';
+import { BarChart3, FileText, Search, Info, Menu, X, FlaskConical } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: BarChart3 },
   { to: '/analisis', label: 'Analisis', icon: Search },
   { to: '/dataset', label: 'Dataset', icon: FileText },
+  { to: '/evaluasi', label: 'Evaluasi', icon: FlaskConical },
   { to: '/tentang', label: 'Tentang', icon: Info },
 ];
 

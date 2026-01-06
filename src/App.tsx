@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout/layout';
 import Dashboard from '@/pages/Dashboard';
 import Analysis from '@/pages/Analysis';
 import Dataset from '@/pages/Dataset';
+import Evaluation from '@/pages/Evaluation';
 import About from '@/pages/About';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="analisis" element={<Analysis />} />
             <Route path="dataset" element={<Dataset />} />
+            <Route path="evaluasi" element={<Evaluation />} />
             <Route path="tentang" element={<About />} />
           </Route>
         </Routes>

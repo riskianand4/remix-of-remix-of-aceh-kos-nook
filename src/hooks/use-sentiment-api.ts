@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { sentimentApi, safePercent } from '@/lib/api';
-import type { SentimentStats, Mention, AnalysisResult, DatasetItem } from '@/types/sentiment';
+import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult } from '@/types/sentiment';
 
 export { safePercent };
 
@@ -129,4 +129,30 @@ export function useBackendStatus() {
   }, []);
 
   return { isConnected, checking };
+}
+
+export function useEvaluation() {
+  const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    const fetchEvaluation = async () => {
+      try {
+        setLoading(true);
+        const result = await sentimentApi.getEvaluation();
+        setEvaluation(result.data);
+        setIsLive(result.isLive);
+      } catch (err) {
+        setError('Gagal memuat data evaluasi');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchEvaluation();
+  }, []);
+
+  return { evaluation, loading, error, isLive };
 }
