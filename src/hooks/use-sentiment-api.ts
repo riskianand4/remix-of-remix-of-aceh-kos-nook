@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { sentimentApi, safePercent } from '@/lib/api';
-import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult } from '@/types/sentiment';
+import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult, SentimentType } from '@/types/sentiment';
 
 export { safePercent };
+
+export interface WordData {
+  text: string;
+  value: number;
+}
 
 export function useSentimentStats() {
   const [stats, setStats] = useState<SentimentStats | null>(null);
@@ -123,7 +128,6 @@ export function useBackendStatus() {
     };
 
     checkBackend();
-    // Re-check every 30 seconds
     const interval = setInterval(checkBackend, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -155,4 +159,28 @@ export function useEvaluation() {
   }, []);
 
   return { evaluation, loading, error, isLive };
+}
+
+export function useWordCloud(sentiment: SentimentType | 'all' = 'all') {
+  const [wordData, setWordData] = useState<WordData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchWordCloud = async () => {
+      try {
+        setLoading(true);
+        const result = await sentimentApi.getWordCloud(sentiment);
+        setWordData(result.data);
+      } catch (err) {
+        setError('Gagal memuat data wordcloud');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchWordCloud();
+  }, [sentiment]);
+
+  return { wordData, loading, error };
 }
