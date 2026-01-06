@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 13%;
+    --primary: 220 13% 13%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 13% 13%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 13% 13%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 13% 13%;
+    --radius: 0.75rem;
+
+    /* Sentiment colors - Clean & Professional */
+    --positive: 142 71% 45%;
+    --positive-foreground: 0 0% 100%;
+    --negative: 0 72% 51%;
+    --negative-foreground: 0 0% 100%;
+    --neutral: 220 9% 46%;
+    --neutral-foreground: 0 0% 100%;
+  }
+
+  .dark {
+    --background: 224 20% 10%;
+    --foreground: 210 20% 98%;
+    --card: 224 20% 13%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 20% 13%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 224 20% 10%;
+    --secondary: 224 20% 17%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 224 20% 17%;
+    --muted-foreground: 215 16% 60%;
+    --accent: 224 20% 17%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 18% 20%;
+    --input: 224 18% 20%;
+    --ring: 210 20% 98%;
+
+    /* Dark mode sentiment colors */
+    --positive: 142 71% 50%;
+    --negative: 0 72% 55%;
+    --neutral: 215 16% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Clean focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+}
+
+@layer utilities {
+  /* Subtle text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
