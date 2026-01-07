@@ -1,34 +1,34 @@
 {
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --port 8080 --host"
   },
-  "dependencies": {
-    "@radix-ui/react-slot": "^1.2.4",
+  "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "@visx/scale": "^3.12.0",
-    "@visx/text": "^3.12.0",
-    "@visx/wordcloud": "^3.12.0",
-    "@vitejs/plugin-react-swc": "^4.2.2",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "lovable-tagger": "^1.1.13",
-    "lucide-react": "^0.562.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "react-is": "^19.2.3",
-    "react-router-dom": "^7.11.0",
-    "recharts": "^3.6.0",
-    "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^3.4.17",
-    "tailwindcss-animate": "^1.0.7",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.3.3",
     "vite": "^7.3.0"
   },
-  "devDependencies": {
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3"
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tabler/icons-react": "^3.36.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.562.0",
+    "motion": "^12.24.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.11.0",
+    "recharts": "^3.6.0",
+    "tailwind-merge": "^3.4.0"
   }
 }

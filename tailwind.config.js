@@ -1,15 +1,10 @@
-import type { Config } from "tailwindcss";
-import plugin from "tailwindcss/plugin";
-
+/** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class", ".dark"],
+  darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -19,9 +14,6 @@ export default {
       },
     },
     extend: {
-      fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,43 +48,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        positive: {
-          DEFAULT: "hsl(var(--positive))",
-          foreground: "hsl(var(--positive-foreground))",
-        },
-        negative: {
-          DEFAULT: "hsl(var(--negative))",
-          foreground: "hsl(var(--negative-foreground))",
-        },
-        neutral: {
-          DEFAULT: "hsl(var(--neutral))",
-          foreground: "hsl(var(--neutral-foreground))",
-        },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      keyframes: {
-        "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-      },
-      animation: {
-        "fade-in": "fade-in 0.3s ease-out",
+        lg: "0.5rem",
+        md: "calc(0.5rem - 2px)",
+        sm: "calc(0.5rem - 4px)",
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    plugin(function ({ addUtilities }) {
-      addUtilities({
-        ".border-border": {
-          borderColor: "hsl(var(--border))",
-        },
-      });
-    }),
-  ],
-} satisfies Config;
+  plugins: [],
+}
