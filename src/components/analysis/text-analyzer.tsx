@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Send, Loader2, RotateCcw } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useSentimentAnalysis } from '@/hooks/use-sentiment-api';
+import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
+import { Textarea } from '../ui/textarea';
+import { useSentimentAnalysis } from '../../hooks/use-sentiment-api';
 import { ResultCard } from './result-card';
 
 export function TextAnalyzer() {

@@ -15,18 +15,26 @@ CORS(app)
 # Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Load model
+# Load model and data
 model = pickle.load(open(os.path.join(BASE_DIR, 'model/model_nb.pkl'), 'rb'))
 vectorizer = pickle.load(open(os.path.join(BASE_DIR, 'model/vectorizer.pkl'), 'rb'))
 
 def get_data_path(filename):
     return os.path.join(BASE_DIR, 'data', filename)
 
+# Load dataset into memory
+try:
+    GLOBAL_DATA = pd.read_csv(get_data_path('data_sentimen.csv'))
+    print("Dataset loaded successfully")
+except Exception as e:
+    print(f"Error loading dataset: {e}")
+    GLOBAL_DATA = pd.DataFrame(columns=['teks', 'label'])
+
 @app.route('/api/stats')
 def get_stats():
     """Get sentiment statistics from dataset"""
     try:
-        data = pd.read_csv(get_data_path('data_sentimen.csv'))
+        data = GLOBAL_DATA
         stats = data['label'].value_counts().to_dict()
         return jsonify({
             'total': len(data),
@@ -174,12 +182,15 @@ def get_wordcloud():
     """Get word frequency data for wordcloud visualization"""
     try:
         sentiment = request.args.get('sentiment', None)
-        data = pd.read_csv(get_data_path('data_sentimen.csv'))
+        data = GLOBAL_DATA
         
         # Filter by sentiment if specified
         if sentiment and sentiment in ['positif', 'negatif', 'netral']:
             data = data[data['label'] == sentiment]
         
+        if data.empty:
+             return jsonify([])
+
         # Combine all texts
         all_text = ' '.join(data['teks'].astype(str).tolist())
         

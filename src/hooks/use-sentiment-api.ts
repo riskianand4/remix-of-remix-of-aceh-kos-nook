@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { sentimentApi, safePercent } from '@/lib/api';
-import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult, SentimentType } from '@/types/sentiment';
+import { sentimentApi, safePercent } from '../lib/api';
+import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult, SentimentType } from '../types/sentiment';
 
 export { safePercent };
 

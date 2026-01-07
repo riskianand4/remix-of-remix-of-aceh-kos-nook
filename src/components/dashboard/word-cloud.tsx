@@ -66,13 +66,14 @@ export function WordCloud() {
           <div className="flex h-[250px] items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
-        ) : wordData.length === 0 ? (
+        ) : !Array.isArray(wordData) || wordData.length === 0 ? (
           <div className="flex h-[250px] items-center justify-center text-muted-foreground">
             Tidak ada data
           </div>
         ) : (
           <div className="h-[250px]">
             <ReactWordcloud 
+              key={JSON.stringify(wordData)} // Force re-render when data changes to prevent internal library errors
               words={wordData} 
               options={options} 
               callbacks={callbacks}

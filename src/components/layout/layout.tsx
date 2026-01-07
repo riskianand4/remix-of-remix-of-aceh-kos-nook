@@ -13,7 +13,7 @@ export function Layout() {
       <footer className="border-t border-border bg-background">
         <div className="container py-6">
           <p className="text-center text-sm text-muted-foreground">
-            © 2024 SentimenPIM — Sistem Analisis Sentimen PT Pupuk Iskandar Muda
+            © {new Date().getFullYear()} SentimenPIM — Sistem Analisis Sentimen PT Pupuk Iskandar Muda
           </p>
         </div>
       </footer>

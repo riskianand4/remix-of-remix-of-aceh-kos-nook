@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SentimentBadge } from '@/components/dashboard/sentiment-badge';
-import { cn } from '@/lib/utils';
-import type { AnalysisResult } from '@/types/sentiment';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { SentimentBadge } from '../dashboard/sentiment-badge';
+import { cn } from '../../lib/utils';
+import type { AnalysisResult } from '../../types/sentiment';
 
 interface ResultCardProps {
   result: AnalysisResult;

@@ -1,7 +1,7 @@
-import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult } from '@/types/sentiment';
+import type { SentimentStats, Mention, AnalysisResult, DatasetItem, EvaluationResult } from '../types/sentiment';
 
 // URL backend Flask - sesuaikan dengan URL server Anda
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE =  'http://localhost:5000';
 
 // Track connection status
 let isBackendConnected = false;
