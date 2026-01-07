@@ -81,20 +81,34 @@ export function WordCloud() {
                 padding={2}
                 random={() => 0.5}
               >
-                {(cloudWords) =>
-                  cloudWords.map((w, i) => (
-                    <Text
-                      key={`${w.text}-${i}`}
-                      fill={colors[i % colors.length]}
-                      textAnchor="middle"
-                      transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-                      fontSize={w.size}
-                      fontFamily="system-ui, sans-serif"
-                    >
-                      {w.text}
-                    </Text>
-                  ))
-                }
+              {(cloudWords) =>
+                cloudWords.map((w, i) => (
+                  <Text
+                    key={`${w.text}-${i}`}
+                    fill={colors[i % colors.length]}
+                    textAnchor="middle"
+                    transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+                    fontSize={w.size}
+                    fontFamily="system-ui, sans-serif"
+                    className="cursor-pointer transition-all duration-200 hover:opacity-80"
+                    style={{ 
+                      transition: 'transform 0.2s ease, opacity 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      const target = e.currentTarget;
+                      target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1.15)`;
+                      target.style.opacity = '0.9';
+                    }}
+                    onMouseLeave={(e) => {
+                      const target = e.currentTarget;
+                      target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1)`;
+                      target.style.opacity = '1';
+                    }}
+                  >
+                    {w.text}
+                  </Text>
+                ))
+              }
               </Wordcloud>
             </svg>
           </div>
