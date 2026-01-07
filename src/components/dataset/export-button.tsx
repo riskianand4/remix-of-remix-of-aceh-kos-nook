@@ -1,6 +1,6 @@
 import { Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import type { DatasetItem } from '@/types/sentiment';
+import { Button } from '../../components/ui/button';
+import type { DatasetItem } from '../../types/sentiment';
 
 interface ExportButtonProps {
   data: DatasetItem[];

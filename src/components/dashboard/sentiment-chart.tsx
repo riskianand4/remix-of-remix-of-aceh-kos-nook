@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { SentimentStats } from '@/types/sentiment';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import type { SentimentStats } from '../../types/sentiment';
 
 interface SentimentChartProps {
   stats: SentimentStats;

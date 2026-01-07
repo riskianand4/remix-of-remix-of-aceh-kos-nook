@@ -1,10 +1,10 @@
 import { BarChart3, ThumbsUp, ThumbsDown, Minus, TrendingUp } from 'lucide-react';
-import { StatCard } from '@/components/dashboard/stat-card';
-import { SentimentChart } from '@/components/dashboard/sentiment-chart';
-import { MentionFeed } from '@/components/dashboard/mention-feed';
-import { WordCloud } from '@/components/dashboard/word-cloud';
-import { useSentimentStats, useMentions, safePercent } from '@/hooks/use-sentiment-api';
-import { BackendStatusBadge } from '@/components/layout/backend-status';
+import { StatCard } from '../components/dashboard/stat-card';
+import { SentimentChart } from '../components/dashboard/sentiment-chart';
+import { MentionFeed } from '../components/dashboard/mention-feed';
+import { WordCloud } from '../components/dashboard/word-cloud';
+import { useSentimentStats, useMentions, safePercent } from '../hooks/use-sentiment-api';
+import { BackendStatusBadge } from '../components/layout/backend-status';
 
 export default function Dashboard() {
   const { stats, loading: statsLoading, isLive } = useSentimentStats();

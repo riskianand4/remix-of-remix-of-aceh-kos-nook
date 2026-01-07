@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@/components/theme/theme-provider';
-import { Layout } from '@/components/layout/layout';
-import Dashboard from '@/pages/Dashboard';
-import Analysis from '@/pages/Analysis';
-import Dataset from '@/pages/Dataset';
-import Evaluation from '@/pages/Evaluation';
-import About from '@/pages/About';
+import { ThemeProvider } from './components/theme/theme-provider';
+import { Layout } from "./components/layout/layout";
+import Dashboard from "./pages/Dashboard"
+import Analysis from "./pages/Analysis";
+import Dataset from "./pages/Dataset";
+import Evaluation from "./pages/Evaluation";
+import About from "./pages/About";
 
 function App() {
   return (

@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useWordCloud } from '@/hooks/use-sentiment-api';
-import type { SentimentType } from '@/types/sentiment';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { useWordCloud } from '../../hooks/use-sentiment-api';
+import type { SentimentType } from '../../types/sentiment';
 
 const sentimentColors: Record<SentimentType | 'all', string[]> = {
   all: ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'],

@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { SentimentBadge } from './sentiment-badge';
-import type { Mention } from '@/types/sentiment';
+import type { Mention } from '../../types/sentiment';
 
 interface MentionFeedProps {
   mentions: Mention[];

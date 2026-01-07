@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BackendStatusBadge } from '@/components/layout/backend-status';
-import { useEvaluation } from '@/hooks/use-sentiment-api';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { BackendStatusBadge } from '../components/layout/backend-status';
+import { useEvaluation } from '../hooks/use-sentiment-api';
 import { CheckCircle, XCircle, Target, TrendingUp } from 'lucide-react';
 
 export default function Evaluation() {

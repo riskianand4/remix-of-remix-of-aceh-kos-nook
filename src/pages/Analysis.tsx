@@ -1,4 +1,4 @@
-import { TextAnalyzer } from '@/components/analysis/text-analyzer';
+import { TextAnalyzer } from '../components/analysis/text-analyzer';
 
 export default function Analysis() {
   return (

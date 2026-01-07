@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { BarChart3, FileText, Search, Info, Menu, X, FlaskConical } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { cn } from '@/lib/utils';
+import { ThemeToggle } from '../../components/theme/theme-toggle';
+import { cn } from '../../lib/utils';
 import { useState } from 'react';
 
 const navItems = [

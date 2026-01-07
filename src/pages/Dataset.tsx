@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Search, Database } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { SentimentBadge } from '@/components/dashboard/sentiment-badge';
-import { ExportButton } from '@/components/dataset/export-button';
-import { useDataset } from '@/hooks/use-sentiment-api';
-import { BackendStatusBadge } from '@/components/layout/backend-status';
-import type { SentimentType } from '@/types/sentiment';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { SentimentBadge } from '../components/dashboard/sentiment-badge';
+import { ExportButton } from '../components/dataset/export-button';
+import { useDataset } from '../hooks/use-sentiment-api';
+import { BackendStatusBadge } from '../components/layout/backend-status';
+import type { SentimentType } from '../types/sentiment';
 
 export default function Dataset() {
   const { dataset, loading, isLive } = useDataset();

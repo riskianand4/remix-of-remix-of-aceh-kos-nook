@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
-import type { SentimentType } from '@/types/sentiment';
+import { cn } from '../../lib/utils';
+import type { SentimentType } from '../../types/sentiment';
 
 const badgeVariants = cva(
   'inline-flex items-center font-medium',
