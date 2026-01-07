@@ -123,11 +123,6 @@ export default function Dataset() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-relaxed">{item.text}</p>
-                    {item.source && (
-                      <p className="mt-1.5 text-xs text-muted-foreground">
-                        Sumber: {item.source}
-                      </p>
-                    )}
                   </div>
                   <SentimentBadge sentiment={item.sentiment} />
                 </div>
