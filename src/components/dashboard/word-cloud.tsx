@@ -14,8 +14,16 @@ const sentimentColors: Record<SentimentType | 'all', string[]> = {
   netral: ['#6b7280', '#4b5563', '#9ca3af'],
 };
 
+interface TooltipData {
+  text: string;
+  value: number;
+  x: number;
+  y: number;
+}
+
 export function WordCloud() {
   const [selectedSentiment, setSelectedSentiment] = useState<SentimentType | 'all'>('all');
+  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const { wordData, loading } = useWordCloud(selectedSentiment);
 
   const filters: Array<{ value: SentimentType | 'all'; label: string }> = [
@@ -69,7 +77,7 @@ export function WordCloud() {
             Tidak ada data
           </div>
         ) : (
-          <div className="h-[250px] w-full flex items-center justify-center">
+          <div className="h-[250px] w-full flex items-center justify-center relative">
             <svg width={500} height={250}>
               <Wordcloud
                 words={wordData}
@@ -82,35 +90,58 @@ export function WordCloud() {
                 random={() => 0.5}
               >
               {(cloudWords) =>
-                cloudWords.map((w, i) => (
-                  <Text
-                    key={`${w.text}-${i}`}
-                    fill={colors[i % colors.length]}
-                    textAnchor="middle"
-                    transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-                    fontSize={w.size}
-                    fontFamily="system-ui, sans-serif"
-                    className="cursor-pointer transition-all duration-200 hover:opacity-80"
-                    style={{ 
-                      transition: 'transform 0.2s ease, opacity 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      const target = e.currentTarget;
-                      target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1.15)`;
-                      target.style.opacity = '0.9';
-                    }}
-                    onMouseLeave={(e) => {
-                      const target = e.currentTarget;
-                      target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1)`;
-                      target.style.opacity = '1';
-                    }}
-                  >
-                    {w.text}
-                  </Text>
-                ))
+                cloudWords.map((w, i) => {
+                  const originalWord = wordData.find(d => d.text === w.text);
+                  return (
+                    <Text
+                      key={`${w.text}-${i}`}
+                      fill={colors[i % colors.length]}
+                      textAnchor="middle"
+                      transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+                      fontSize={w.size}
+                      fontFamily="system-ui, sans-serif"
+                      className="cursor-pointer"
+                      style={{ 
+                        transition: 'transform 0.2s ease, opacity 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        const target = e.currentTarget;
+                        target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1.15)`;
+                        target.style.opacity = '0.9';
+                        setTooltip({
+                          text: w.text || '',
+                          value: originalWord?.value || 0,
+                          x: (w.x || 0) + 250,
+                          y: (w.y || 0) + 125,
+                        });
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.currentTarget;
+                        target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1)`;
+                        target.style.opacity = '1';
+                        setTooltip(null);
+                      }}
+                    >
+                      {w.text}
+                    </Text>
+                  );
+                })
               }
               </Wordcloud>
             </svg>
+            {tooltip && (
+              <div
+                className="absolute pointer-events-none bg-popover text-popover-foreground px-3 py-1.5 rounded-md shadow-lg text-sm font-medium border animate-fade-in z-10"
+                style={{
+                  left: tooltip.x,
+                  top: tooltip.y - 40,
+                  transform: 'translateX(-50%)',
+                }}
+              >
+                <span className="font-semibold">{tooltip.text}</span>
+                <span className="text-muted-foreground ml-1">({tooltip.value}x)</span>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
