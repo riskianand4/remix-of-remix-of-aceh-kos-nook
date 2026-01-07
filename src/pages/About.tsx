@@ -33,7 +33,7 @@ export default function About() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-8xl space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Tentang Sistem</h1>

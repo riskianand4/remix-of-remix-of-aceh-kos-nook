@@ -2,7 +2,7 @@ import { TextAnalyzer } from '../components/analysis/text-analyzer';
 
 export default function Analysis() {
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <div className="mx-auto max-w-8xl space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Analisis Sentimen</h1>

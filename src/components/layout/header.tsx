@@ -3,7 +3,7 @@ import { BarChart3, FileText, Search, Info, Menu, X, FlaskConical } from 'lucide
 import { ThemeToggle } from '../../components/theme/theme-toggle';
 import { cn } from '../../lib/utils';
 import { useState } from 'react';
-
+import logo from '../../assets/logo.png';
 const navItems = [
   { to: '/', label: 'Dashboard', icon: BarChart3 },
   { to: '/analisis', label: 'Analisis', icon: Search },
@@ -20,10 +20,10 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <NavLink to="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground">
-            <BarChart3 className="h-5 w-5 text-background" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg ">
+            <img src={logo} alt="" />
           </div>
-          <span className="text-lg font-semibold">SentimenPIM</span>
+          <span className="text-lg font-semibold">Sentimen Pupuk Iskandar Muda</span>
         </NavLink>
 
         {/* Desktop Navigation */}
