@@ -1,7 +1,4 @@
 import { useState, useMemo } from 'react';
-import Wordcloud from '@visx/wordcloud/lib/Wordcloud';
-import { Text } from '@visx/text';
-import { scaleLog } from '@visx/scale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWordCloud } from '@/hooks/use-sentiment-api';
@@ -35,17 +32,30 @@ export function WordCloud() {
 
   const colors = sentimentColors[selectedSentiment];
 
-  const fontScale = useMemo(() => {
-    if (!wordData || wordData.length === 0) return () => 20;
+  const { minVal, maxVal } = useMemo(() => {
+    if (!wordData || wordData.length === 0) return { minVal: 1, maxVal: 1 };
     const values = wordData.map((w) => w.value);
-    const minVal = Math.min(...values);
-    const maxVal = Math.max(...values);
-    if (minVal === maxVal) return () => 30;
-    return scaleLog({
-      domain: [minVal, maxVal],
-      range: [14, 60],
-    });
+    return { minVal: Math.min(...values), maxVal: Math.max(...values) };
   }, [wordData]);
+
+  const getFontSize = (value: number) => {
+    if (minVal === maxVal) return 20;
+    const ratio = (value - minVal) / (maxVal - minVal);
+    return 12 + ratio * 32; // 12px to 44px
+  };
+
+  const handleMouseEnter = (word: { text: string; value: number }, e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const parent = e.currentTarget.parentElement?.getBoundingClientRect();
+    if (parent) {
+      setTooltip({
+        text: word.text,
+        value: word.value,
+        x: rect.left - parent.left + rect.width / 2,
+        y: rect.top - parent.top,
+      });
+    }
+  };
 
   return (
     <Card>
@@ -77,64 +87,31 @@ export function WordCloud() {
             Tidak ada data
           </div>
         ) : (
-          <div className="h-[250px] w-full flex items-center justify-center relative">
-            <svg width={500} height={250}>
-              <Wordcloud
-                words={wordData}
-                width={500}
-                height={250}
-                fontSize={(w) => fontScale(w.value)}
-                spiral="archimedean"
-                rotate={0}
-                padding={2}
-                random={() => 0.5}
-              >
-              {(cloudWords) =>
-                cloudWords.map((w, i) => {
-                  const originalWord = wordData.find(d => d.text === w.text);
-                  return (
-                    <Text
-                      key={`${w.text}-${i}`}
-                      fill={colors[i % colors.length]}
-                      textAnchor="middle"
-                      transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-                      fontSize={w.size}
-                      fontFamily="system-ui, sans-serif"
-                      className="cursor-pointer"
-                      style={{ 
-                        transition: 'transform 0.2s ease, opacity 0.2s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        const target = e.currentTarget;
-                        target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1.15)`;
-                        target.style.opacity = '0.9';
-                        setTooltip({
-                          text: w.text || '',
-                          value: originalWord?.value || 0,
-                          x: (w.x || 0) + 250,
-                          y: (w.y || 0) + 125,
-                        });
-                      }}
-                      onMouseLeave={(e) => {
-                        const target = e.currentTarget;
-                        target.style.transform = `translate(${w.x}, ${w.y}) rotate(${w.rotate}) scale(1)`;
-                        target.style.opacity = '1';
-                        setTooltip(null);
-                      }}
-                    >
-                      {w.text}
-                    </Text>
-                  );
-                })
-              }
-              </Wordcloud>
-            </svg>
+          <div className="h-[250px] w-full flex items-center justify-center relative overflow-hidden">
+            <div className="flex flex-wrap items-center justify-center gap-2 p-4 max-h-full overflow-hidden">
+              {wordData.slice(0, 40).map((word, i) => (
+                <span
+                  key={`${word.text}-${i}`}
+                  className="cursor-pointer transition-all duration-200 hover:scale-110 hover:opacity-80 inline-block"
+                  style={{
+                    fontSize: `${getFontSize(word.value)}px`,
+                    color: colors[i % colors.length],
+                    fontWeight: word.value > (maxVal + minVal) / 2 ? 600 : 400,
+                    lineHeight: 1.2,
+                  }}
+                  onMouseEnter={(e) => handleMouseEnter(word, e)}
+                  onMouseLeave={() => setTooltip(null)}
+                >
+                  {word.text}
+                </span>
+              ))}
+            </div>
             {tooltip && (
               <div
                 className="absolute pointer-events-none bg-popover text-popover-foreground px-3 py-1.5 rounded-md shadow-lg text-sm font-medium border animate-fade-in z-10"
                 style={{
                   left: tooltip.x,
-                  top: tooltip.y - 40,
+                  top: tooltip.y - 35,
                   transform: 'translateX(-50%)',
                 }}
               >
