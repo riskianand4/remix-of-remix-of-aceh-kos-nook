@@ -1,5 +1,5 @@
 import { cn } from '../../lib/utils';
-import { Card } from '../../components/ui/card';
+import { Card } from '../ui/card';
 import type { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -27,17 +27,17 @@ export function StatCard({
   };
 
   return (
-    <Card className={cn('p-5', className)}>
+    <Card className={cn('p-3 sm:p-5 transition-all duration-200 hover:shadow-md', className)}>
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-semibold tracking-tight">{value.toLocaleString()}</p>
+        <div className="space-y-0.5 sm:space-y-1">
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-xl sm:text-3xl font-semibold tracking-tight">{value.toLocaleString()}</p>
           {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{description}</p>
           )}
         </div>
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', iconColors[variant])}>
-          <Icon className="h-5 w-5" />
+        <div className={cn('flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg', iconColors[variant])}>
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </div>
       </div>
     </Card>

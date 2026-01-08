@@ -1,13 +1,10 @@
 import { Outlet } from "react-router-dom";
 import { Header } from "./header";
 import { FloatingDock } from "../ui/floating-dock";
+import { ScrollToTop } from "../ui/scroll-to-top";
 import {
   IconAnalyzeFilled,
-  IconBrandX,
-  IconExchange,
   IconHome,
-  IconNewSection,
-  IconTerminal2,
 } from "@tabler/icons-react";
 import { CheckCircle, Database, Info } from "lucide-react";
 
@@ -49,21 +46,22 @@ export function Layout() {
       to: "/tentang",
     },
   ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container py-8 pb-16">
+      <main className="container py-4 sm:py-8 pb-20 sm:pb-24">
         <Outlet />
-        <div className="fixed bottom-4 left-0 right-0 z-50 mx-auto w-max ">
+        <div className="fixed bottom-4 left-0 right-0 z-50 mx-auto w-max">
           <FloatingDock items={links} />
         </div>
+        <ScrollToTop />
       </main>
       {/* Footer */}
       <footer className="border-t border-border bg-background">
-        <div className="container py-6">
-          <p className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} SentimenPIM — Sistem Analisis Sentimen
-            PT Pupuk Iskandar Muda
+        <div className="container py-4 sm:py-6">
+          <p className="text-center text-[10px] sm:text-sm text-muted-foreground">
+            © {new Date().getFullYear()} SentimenPIM — Sistem Analisis Sentimen PT Pupuk Iskandar Muda
           </p>
         </div>
       </footer>

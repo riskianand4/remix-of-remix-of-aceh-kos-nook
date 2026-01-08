@@ -23,6 +23,13 @@
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9.0%;
     --ring: 0 0% 3.7%;
+    --positive: 142 76% 36%;
+    --positive-foreground: 0 0% 98%;
+    --negative: 0 84% 60%;
+    --negative-foreground: 0 0% 98%;
+    --neutral: 0 0% 45%;
+    --neutral-foreground: 0 0% 98%;
+    --radius: 0.5rem;
   }
 
   .dark {
@@ -45,6 +52,12 @@
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --ring: 0 0% 83.3%;
+    --positive: 142 76% 46%;
+    --positive-foreground: 0 0% 98%;
+    --negative: 0 84% 65%;
+    --negative-foreground: 0 0% 98%;
+    --neutral: 0 0% 60%;
+    --neutral-foreground: 0 0% 98%;
   }
 }
 
@@ -69,4 +82,34 @@ html {
 /* Subtle text balance */
 .text-balance {
   text-wrap: balance;
+}
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
