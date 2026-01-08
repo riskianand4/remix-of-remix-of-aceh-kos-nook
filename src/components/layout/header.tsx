@@ -15,7 +15,7 @@ export function Header() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg ">
             <img src={logo} alt="" />
           </div>
-          <span className="text-lg font-semibold">
+          <span className="sm:text-lg font-semibold text-xs">
             Sentimen Pupuk Iskandar Muda
           </span>
         </NavLink>
