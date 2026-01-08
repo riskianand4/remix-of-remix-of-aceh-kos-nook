@@ -78,9 +78,19 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        "stagger-fade": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
+        "shimmer": "shimmer 1.5s infinite",
+        "stagger-fade": "stagger-fade 0.3s ease-out forwards",
       },
     },
   },
