@@ -1065,6 +1065,412 @@ flowchart LR
 
 ---
 
+## 🗃️ Entity Relationship Diagram (ERD)
+
+### ERD - Struktur Data Sistem
+
+```mermaid
+erDiagram
+    DATA_SENTIMEN {
+        int id PK "Primary Key"
+        string teks "Teks komentar mentah"
+        string label "positif/negatif/netral"
+        datetime created_at "Waktu input"
+    }
+    
+    DATA_BERSIH {
+        int id PK "Primary Key"
+        string teks "Teks asli"
+        string label "Label sentimen"
+        string clean_text "Teks hasil preprocessing"
+    }
+    
+    MODEL_ML {
+        int id PK "Primary Key"
+        string nama "Nama model"
+        string path "Path file .pkl"
+        float accuracy "Akurasi model"
+        datetime trained_at "Waktu training"
+    }
+    
+    VECTORIZER {
+        int id PK "Primary Key"
+        string nama "Nama vectorizer"
+        string path "Path file .pkl"
+        int vocabulary_size "Jumlah vocabulary"
+    }
+    
+    ANALISIS_RESULT {
+        int id PK "Primary Key"
+        string input_text "Teks yang dianalisis"
+        string sentiment "Hasil prediksi"
+        float confidence "Tingkat keyakinan"
+        float prob_positif "Probabilitas positif"
+        float prob_negatif "Probabilitas negatif"
+        float prob_netral "Probabilitas netral"
+        datetime analyzed_at "Waktu analisis"
+    }
+    
+    EVALUATION_METRICS {
+        int id PK "Primary Key"
+        float accuracy "Akurasi"
+        float precision "Precision"
+        float recall "Recall"
+        float f1_score "F1 Score"
+        json confusion_matrix "Matrix konfusi"
+        json classification_report "Laporan klasifikasi"
+        datetime evaluated_at "Waktu evaluasi"
+    }
+    
+    USER_SESSION {
+        string session_id PK "Session ID"
+        datetime started_at "Waktu mulai"
+        int total_analyses "Jumlah analisis"
+        string last_page "Halaman terakhir"
+    }
+    
+    %% Relationships
+    DATA_SENTIMEN ||--|| DATA_BERSIH : "preprocessed_to"
+    DATA_BERSIH ||--o{ MODEL_ML : "trains"
+    DATA_BERSIH ||--o{ VECTORIZER : "fits"
+    MODEL_ML ||--o{ ANALISIS_RESULT : "produces"
+    VECTORIZER ||--o{ ANALISIS_RESULT : "transforms"
+    MODEL_ML ||--|| EVALUATION_METRICS : "evaluated_by"
+    USER_SESSION ||--o{ ANALISIS_RESULT : "creates"
+```
+
+### ERD - Relasi Komponen Sistem
+
+```mermaid
+erDiagram
+    FRONTEND {
+        string component "React Component"
+        string state "State Management"
+        string hooks "Custom Hooks"
+    }
+    
+    API_ENDPOINT {
+        string method "GET/POST"
+        string path "URL Path"
+        json request "Request Body"
+        json response "Response Body"
+    }
+    
+    BACKEND_SERVICE {
+        string name "Service Name"
+        string function "Fungsi"
+    }
+    
+    ML_PIPELINE {
+        string preprocessor "Text Preprocessor"
+        string vectorizer "TF-IDF Vectorizer"
+        string classifier "Naive Bayes"
+    }
+    
+    DATA_STORE {
+        string type "CSV/PKL"
+        string path "File Path"
+    }
+    
+    FRONTEND ||--o{ API_ENDPOINT : "calls"
+    API_ENDPOINT ||--|| BACKEND_SERVICE : "handled_by"
+    BACKEND_SERVICE ||--|| ML_PIPELINE : "uses"
+    ML_PIPELINE ||--o{ DATA_STORE : "reads/writes"
+```
+
+### Deskripsi Entitas
+
+| Entitas | Deskripsi | Atribut Utama |
+|---------|-----------|---------------|
+| **DATA_SENTIMEN** | Data mentah komentar publik dengan label | teks, label |
+| **DATA_BERSIH** | Data hasil preprocessing | teks, label, clean_text |
+| **MODEL_ML** | Model machine learning tersimpan | path, accuracy |
+| **VECTORIZER** | TF-IDF vectorizer tersimpan | path, vocabulary_size |
+| **ANALISIS_RESULT** | Hasil analisis sentimen | sentiment, confidence, probabilities |
+| **EVALUATION_METRICS** | Metrics evaluasi model | accuracy, precision, recall, f1 |
+| **USER_SESSION** | Session pengguna | session_id, total_analyses |
+
+---
+
+## 🔄 State Diagram
+
+### State Diagram - Aplikasi Frontend
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: App Loaded
+    
+    Idle --> Loading: User Request Data
+    Loading --> Success: Data Received
+    Loading --> Error: Request Failed
+    
+    Success --> Idle: Data Displayed
+    Error --> Idle: User Dismiss
+    Error --> Loading: User Retry
+    
+    state Idle {
+        [*] --> Dashboard
+        Dashboard --> Analysis: Navigate
+        Dashboard --> Dataset: Navigate
+        Dashboard --> Evaluation: Navigate
+        Dashboard --> About: Navigate
+        Analysis --> Dashboard: Navigate
+        Dataset --> Dashboard: Navigate
+        Evaluation --> Dashboard: Navigate
+        About --> Dashboard: Navigate
+    }
+```
+
+### State Diagram - Proses Analisis Sentimen
+
+```mermaid
+stateDiagram-v2
+    [*] --> InputEmpty: Page Load
+    
+    InputEmpty --> InputFilled: User Types Text
+    InputFilled --> InputEmpty: User Clears Text
+    InputFilled --> Validating: User Clicks Analyze
+    
+    Validating --> InputEmpty: Validation Failed (Empty)
+    Validating --> Analyzing: Validation Passed
+    
+    Analyzing --> ResultDisplayed: Analysis Success
+    Analyzing --> ErrorState: Analysis Failed
+    
+    ResultDisplayed --> InputFilled: User Edits Text
+    ResultDisplayed --> InputEmpty: User Resets
+    
+    ErrorState --> Analyzing: User Retries
+    ErrorState --> InputFilled: User Edits Text
+    
+    state Analyzing {
+        [*] --> SendingRequest
+        SendingRequest --> ProcessingBackend
+        ProcessingBackend --> ReceivingResponse
+        ReceivingResponse --> [*]
+    }
+    
+    state ProcessingBackend {
+        [*] --> Vectorizing
+        Vectorizing --> Predicting
+        Predicting --> CalculatingProbability
+        CalculatingProbability --> [*]
+    }
+```
+
+### State Diagram - Backend API Request
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: Server Started
+    
+    Idle --> ReceivingRequest: HTTP Request In
+    
+    ReceivingRequest --> Validating: Parse JSON
+    Validating --> Processing: Valid Request
+    Validating --> ErrorResponse: Invalid Request
+    
+    state Processing {
+        [*] --> LoadingModel
+        LoadingModel --> Transforming: Model Ready
+        Transforming --> Predicting: Vector Ready
+        Predicting --> FormattingResponse: Prediction Done
+        FormattingResponse --> [*]
+    }
+    
+    Processing --> SuccessResponse: Processing Complete
+    Processing --> ErrorResponse: Processing Error
+    
+    SuccessResponse --> Idle: Response Sent (200)
+    ErrorResponse --> Idle: Response Sent (4xx/5xx)
+```
+
+### State Diagram - Halaman Dashboard
+
+```mermaid
+stateDiagram-v2
+    [*] --> InitialLoading: Enter Dashboard
+    
+    InitialLoading --> LoadingStats: Fetch Stats
+    InitialLoading --> LoadingMentions: Fetch Mentions
+    InitialLoading --> LoadingWordCloud: Fetch WordCloud
+    
+    state LoadingStats {
+        [*] --> FetchingStats
+        FetchingStats --> StatsLoaded: Success
+        FetchingStats --> StatsError: Failed
+    }
+    
+    state LoadingMentions {
+        [*] --> FetchingMentions
+        FetchingMentions --> MentionsLoaded: Success
+        FetchingMentions --> MentionsError: Failed
+    }
+    
+    state LoadingWordCloud {
+        [*] --> FetchingWordCloud
+        FetchingWordCloud --> WordCloudLoaded: Success
+        FetchingWordCloud --> WordCloudError: Failed
+    }
+    
+    StatsLoaded --> AllLoaded: Check Others
+    MentionsLoaded --> AllLoaded: Check Others
+    WordCloudLoaded --> AllLoaded: Check Others
+    
+    AllLoaded --> DisplayDashboard: All Success
+    
+    StatsError --> PartialDisplay: Show Available
+    MentionsError --> PartialDisplay: Show Available
+    WordCloudError --> PartialDisplay: Show Available
+    
+    DisplayDashboard --> [*]: User Navigates Away
+    PartialDisplay --> [*]: User Navigates Away
+```
+
+### State Diagram - Dataset dengan Filter & Pagination
+
+```mermaid
+stateDiagram-v2
+    [*] --> Loading: Enter Dataset Page
+    
+    Loading --> DisplayAll: Data Loaded
+    Loading --> Error: Load Failed
+    
+    DisplayAll --> Filtering: User Applies Filter
+    DisplayAll --> Searching: User Types Search
+    DisplayAll --> Paginating: User Changes Page
+    DisplayAll --> Exporting: User Clicks Export
+    
+    Filtering --> DisplayFiltered: Filter Applied
+    DisplayFiltered --> DisplayAll: Clear Filter
+    DisplayFiltered --> Searching: User Searches
+    DisplayFiltered --> Paginating: Change Page
+    
+    Searching --> DisplaySearched: Search Applied
+    DisplaySearched --> DisplayAll: Clear Search
+    DisplaySearched --> Filtering: Apply Filter
+    DisplaySearched --> Paginating: Change Page
+    
+    Paginating --> DisplayPage: Page Changed
+    DisplayPage --> DisplayAll: Back to Page 1
+    
+    Exporting --> DownloadReady: CSV Generated
+    DownloadReady --> DisplayAll: Download Complete
+    
+    Error --> Loading: User Retries
+    Error --> [*]: User Leaves
+```
+
+### State Diagram - Model Training Pipeline
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotTrained: Initial State
+    
+    NotTrained --> LoadingData: Start Training
+    
+    LoadingData --> DataLoaded: CSV Loaded
+    LoadingData --> TrainingError: Load Failed
+    
+    DataLoaded --> Preprocessing: Start Preprocessing
+    
+    state Preprocessing {
+        [*] --> CaseFolding
+        CaseFolding --> RemovingSpecialChars
+        RemovingSpecialChars --> Tokenizing
+        Tokenizing --> RemovingStopwords
+        RemovingStopwords --> JoiningTokens
+        JoiningTokens --> [*]
+    }
+    
+    Preprocessing --> DataCleaned: Preprocessing Done
+    DataCleaned --> SavingCleanData: Save to CSV
+    SavingCleanData --> FeatureExtraction: CSV Saved
+    
+    state FeatureExtraction {
+        [*] --> FittingVectorizer
+        FittingVectorizer --> TransformingData
+        TransformingData --> SplittingData
+        SplittingData --> [*]
+    }
+    
+    FeatureExtraction --> ReadyToTrain: Features Ready
+    
+    state Training {
+        [*] --> InitializingModel
+        InitializingModel --> FittingModel
+        FittingModel --> ModelTrained
+        ModelTrained --> [*]
+    }
+    
+    ReadyToTrain --> Training: Start NB Training
+    Training --> Evaluating: Model Trained
+    
+    state Evaluating {
+        [*] --> Predicting
+        Predicting --> CalculatingMetrics
+        CalculatingMetrics --> GeneratingReport
+        GeneratingReport --> [*]
+    }
+    
+    Evaluating --> SavingModel: Evaluation Done
+    SavingModel --> Trained: Model & Vectorizer Saved
+    
+    Trained --> [*]: Training Complete
+    TrainingError --> NotTrained: Reset
+```
+
+### State Diagram - Error Handling dengan Auto-Retry
+
+```mermaid
+stateDiagram-v2
+    [*] --> Normal: Component Mounted
+    
+    Normal --> Error: Request Failed
+    
+    state Error {
+        [*] --> DisplayError
+        DisplayError --> CountingDown: Auto-retry Enabled
+        
+        state CountingDown {
+            [*] --> Countdown10s
+            Countdown10s --> Countdown9s: 1 second
+            Countdown9s --> Countdown8s: 1 second
+            Countdown8s --> Countdown7s: 1 second
+            Countdown7s --> Countdown6s: 1 second
+            Countdown6s --> Countdown5s: 1 second
+            Countdown5s --> Countdown4s: 1 second
+            Countdown4s --> Countdown3s: 1 second
+            Countdown3s --> Countdown2s: 1 second
+            Countdown2s --> Countdown1s: 1 second
+            Countdown1s --> [*]: Countdown Complete
+        }
+        
+        CountingDown --> Retrying: Countdown Done
+        DisplayError --> Retrying: User Clicks Retry
+    }
+    
+    Retrying --> Normal: Retry Success
+    Retrying --> Error: Retry Failed
+    
+    Normal --> [*]: Component Unmounted
+```
+
+### Deskripsi State
+
+| State | Deskripsi | Transisi |
+|-------|-----------|----------|
+| **Idle** | Aplikasi dalam keadaan siap | → Loading saat request |
+| **Loading** | Sedang memuat data | → Success/Error |
+| **Success** | Data berhasil dimuat | → Idle (display data) |
+| **Error** | Terjadi kesalahan | → Retry/Dismiss |
+| **Analyzing** | Proses analisis berjalan | → Result/Error |
+| **ResultDisplayed** | Hasil analisis ditampilkan | → Edit/Reset |
+| **Filtering** | Memfilter data | → DisplayFiltered |
+| **Exporting** | Mengexport data | → DownloadReady |
+
+---
+
 ## 🛠️ Teknologi yang Digunakan
 
 ### Frontend
