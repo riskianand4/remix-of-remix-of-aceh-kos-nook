@@ -10,7 +10,11 @@ import type { AnalysisResult } from '../../types/sentiment';
 
 type AnalysisMode = 'ml' | 'llm';
 
-export function TextAnalyzer() {
+interface TextAnalyzerProps {
+  onAnalysisComplete?: (result: AnalysisResult) => void;
+}
+
+export function TextAnalyzer({ onAnalysisComplete }: TextAnalyzerProps) {
   const [text, setText] = useState('');
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('llm');
   const [llmResult, setLlmResult] = useState<AnalysisResult | null>(null);
@@ -35,7 +39,9 @@ export function TextAnalyzer() {
         throw new Error(data.error || 'Gagal menganalisis sentimen');
       }
 
-      setLlmResult(data.data as AnalysisResult);
+      const result = data.data as AnalysisResult;
+      setLlmResult(result);
+      onAnalysisComplete?.(result);
     } catch (err) {
       console.error('LLM analysis error:', err);
       setLlmError(err instanceof Error ? err.message : 'Gagal menganalisis dengan AI');
@@ -54,6 +60,18 @@ export function TextAnalyzer() {
       analyzeML(text);
     }
   };
+
+  // Handle ML result callback
+  const handleMLComplete = () => {
+    if (mlResult) {
+      onAnalysisComplete?.(mlResult);
+    }
+  };
+
+  // Call callback when ML result changes
+  if (mlResult && analysisMode === 'ml') {
+    handleMLComplete();
+  }
 
   const handleReset = () => {
     setText('');
