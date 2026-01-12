@@ -16,7 +16,11 @@ interface ScrapedData {
 
 type AnalysisMode = 'ml' | 'llm';
 
-export function UrlAnalyzer() {
+interface UrlAnalyzerProps {
+  onAnalysisComplete?: (result: AnalysisResult, sourceUrl?: string, sourceTitle?: string) => void;
+}
+
+export function UrlAnalyzer({ onAnalysisComplete }: UrlAnalyzerProps) {
   const [url, setUrl] = useState('');
   const [scraping, setScraping] = useState(false);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
@@ -63,9 +67,10 @@ export function UrlAnalyzer() {
       }
 
       if (analysisMode === 'llm') {
-        await analyzeLLM(textToAnalyze);
+        await analyzeLLM(textToAnalyze, scraped.sourceUrl, scraped.title);
       } else {
         await analyzeML(textToAnalyze);
+        // Callback will be handled in effect
       }
     } catch (err) {
       console.error('Scrape and analyze error:', err);
@@ -75,7 +80,7 @@ export function UrlAnalyzer() {
     }
   };
 
-  const analyzeLLM = async (text: string) => {
+  const analyzeLLM = async (text: string, sourceUrl?: string, sourceTitle?: string) => {
     setLlmLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('analyze-sentiment-llm', {
@@ -90,7 +95,9 @@ export function UrlAnalyzer() {
         throw new Error(data.error || 'Gagal menganalisis sentimen');
       }
 
-      setLlmResult(data.data as AnalysisResult);
+      const result = data.data as AnalysisResult;
+      setLlmResult(result);
+      onAnalysisComplete?.(result, sourceUrl, sourceTitle);
     } catch (err) {
       console.error('LLM analysis error:', err);
       setScrapeError(err instanceof Error ? err.message : 'Gagal menganalisis dengan AI');
@@ -98,6 +105,11 @@ export function UrlAnalyzer() {
       setLlmLoading(false);
     }
   };
+
+  // Handle ML result callback
+  if (mlResult && analysisMode === 'ml' && scrapedData) {
+    onAnalysisComplete?.(mlResult, scrapedData.sourceUrl, scrapedData.title);
+  }
 
   const handleReset = () => {
     setUrl('');

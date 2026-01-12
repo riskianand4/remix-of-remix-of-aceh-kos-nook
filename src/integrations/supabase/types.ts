@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_history: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          method: string
+          model: string | null
+          probabilities: Json | null
+          reasoning: string | null
+          sentiment: string
+          source_title: string | null
+          source_url: string | null
+          text: string
+          user_id: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          id?: string
+          method: string
+          model?: string | null
+          probabilities?: Json | null
+          reasoning?: string | null
+          sentiment: string
+          source_title?: string | null
+          source_url?: string | null
+          text: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          method?: string
+          model?: string | null
+          probabilities?: Json | null
+          reasoning?: string | null
+          sentiment?: string
+          source_title?: string | null
+          source_url?: string | null
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
