@@ -1924,6 +1924,194 @@ Model Naive Bayes yang telah di-tuning mencapai akurasi **~88-92%** pada test se
 
 ---
 
+## 🔗 Fitur Analisis URL Berita
+
+### Deskripsi Fitur
+Fitur baru yang memungkinkan pengguna menganalisis sentimen langsung dari URL artikel berita. Sistem secara otomatis:
+1. Mengekstrak konten dari URL menggunakan Firecrawl API
+2. Memproses teks yang diekstrak
+3. Menerapkan analisis sentimen dengan model Naive Bayes
+
+### Flowchart Analisis URL Berita
+
+```mermaid
+flowchart TD
+    Start([🟢 User Membuka Halaman Analisis])
+    
+    subgraph ModeSelection["🔀 Pilih Mode"]
+        M1{Mode Analisis?}
+        M2[Tab: Teks Manual]
+        M3[Tab: URL Berita]
+    end
+    
+    subgraph UrlInput["📥 Input URL"]
+        U1[User memasukkan URL berita]
+        U2[Klik 'Ekstrak & Analisis']
+        U3{URL Valid?}
+        U4[Tampilkan error validasi]
+    end
+    
+    subgraph Scraping["🌐 Web Scraping (Firecrawl)"]
+        S1[Kirim request ke Edge Function]
+        S2[Edge Function memanggil Firecrawl API]
+        S3[Firecrawl mengekstrak konten artikel]
+        S4[Return: markdown, title, description]
+        S5{Scraping berhasil?}
+        S6[Tampilkan error scraping]
+    end
+    
+    subgraph ContentPreview["📄 Preview Konten"]
+        C1[Tampilkan judul artikel]
+        C2[Tampilkan deskripsi]
+        C3[Tampilkan preview konten]
+        C4[Link ke sumber asli]
+    end
+    
+    subgraph Analysis["🤖 Analisis Sentimen"]
+        A1[Ambil 2000 karakter pertama]
+        A2[Kirim ke Backend /api/analyze]
+        A3[Preprocessing teks]
+        A4[TF-IDF Vectorization]
+        A5[Naive Bayes Prediction]
+        A6[Return hasil analisis]
+    end
+    
+    subgraph Result["📊 Hasil"]
+        R1[Tampilkan Result Card]
+        R2[Badge Sentimen]
+        R3[Confidence Score]
+        R4[Probability Chart]
+    end
+    
+    Start --> M1
+    M1 -->|Teks| M2
+    M1 -->|URL| M3
+    
+    M3 --> U1
+    U1 --> U2
+    U2 --> U3
+    U3 -->|Tidak| U4
+    U4 --> U1
+    U3 -->|Ya| S1
+    
+    S1 --> S2 --> S3 --> S4 --> S5
+    S5 -->|Tidak| S6
+    S6 --> U1
+    S5 -->|Ya| C1
+    
+    C1 --> C2 --> C3 --> C4
+    C4 --> A1
+    
+    A1 --> A2 --> A3 --> A4 --> A5 --> A6
+    
+    A6 --> R1 --> R2 --> R3 --> R4
+```
+
+### Sequence Diagram - Analisis URL
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend (React)
+    participant EF as Edge Function
+    participant FC as Firecrawl API
+    participant BE as Backend (Flask)
+    participant ML as ML Model
+
+    U->>FE: Input URL berita
+    U->>FE: Klik "Ekstrak & Analisis"
+    
+    FE->>EF: POST /functions/v1/scrape-url
+    Note over FE,EF: { url: "https://news.com/article" }
+    
+    EF->>FC: POST /v1/scrape
+    Note over EF,FC: formats: ['markdown'], onlyMainContent: true
+    
+    FC-->>EF: { markdown, metadata }
+    EF-->>FE: { content, title, description, sourceUrl }
+    
+    FE->>FE: Preview konten (max 500 char)
+    FE->>BE: POST /api/analyze
+    Note over FE,BE: { text: content.slice(0, 2000) }
+    
+    BE->>ML: Preprocessing + TF-IDF
+    ML->>ML: model.predict()
+    ML->>ML: model.predict_proba()
+    ML-->>BE: { label, probabilities }
+    
+    BE-->>FE: { sentiment, confidence, probabilities }
+    FE->>FE: Render Result Card
+    FE-->>U: Tampilkan hasil analisis
+```
+
+### Arsitektur Fitur URL Analysis
+
+```mermaid
+flowchart LR
+    subgraph Client["🖥️ Frontend"]
+        UI[URL Input Form]
+        Preview[Content Preview]
+        Result[Result Card]
+    end
+    
+    subgraph Cloud["☁️ Lovable Cloud"]
+        EF[Edge Function<br/>scrape-url]
+    end
+    
+    subgraph External["🌐 External"]
+        FC[Firecrawl API]
+    end
+    
+    subgraph Backend["⚙️ Flask Backend"]
+        API[/api/analyze]
+        Model[ML Model]
+    end
+    
+    UI -->|URL| EF
+    EF -->|Scrape Request| FC
+    FC -->|Markdown Content| EF
+    EF -->|Extracted Content| Preview
+    Preview -->|Content Text| API
+    API -->|Analyze| Model
+    Model -->|Prediction| Result
+```
+
+### API Endpoint Baru
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/functions/v1/scrape-url` | POST | Mengekstrak konten dari URL menggunakan Firecrawl |
+
+**Request Body:**
+```json
+{
+  "url": "https://example.com/news/article"
+}
+```
+
+**Response Success:**
+```json
+{
+  "success": true,
+  "data": {
+    "content": "Isi artikel dalam format markdown...",
+    "title": "Judul Artikel",
+    "description": "Deskripsi meta artikel",
+    "sourceUrl": "https://example.com/news/article"
+  }
+}
+```
+
+**Response Error:**
+```json
+{
+  "success": false,
+  "error": "Gagal mengekstrak konten dari URL"
+}
+```
+
+---
+
 ## 📋 Fitur yang Direncanakan (Roadmap)
 
 ### Phase 1: Model Improvement ✅
@@ -1932,7 +2120,8 @@ Model Naive Bayes yang telah di-tuning mencapai akurasi **~88-92%** pada test se
 - [x] Hyperparameter tuning dengan GridSearchCV
 - [x] Cross-validation comparison
 
-### Phase 2: Core Features (Coming Soon)
+### Phase 2: Core Features ✅
+- [x] **URL Analysis** - Ekstrak dan analisis sentimen dari URL berita
 - [ ] Bulk Analysis - Upload CSV untuk analisis massal
 - [ ] Analysis History - Simpan riwayat analisis
 - [ ] Keyword Highlighting - Highlight kata yang mempengaruhi prediksi
