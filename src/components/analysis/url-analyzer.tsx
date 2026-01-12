@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link2, Loader2, RotateCcw, ExternalLink, FileText } from 'lucide-react';
+import { Link2, Loader2, RotateCcw, ExternalLink, FileText, Sparkles, Brain } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { useSentimentAnalysis } from '../../hooks/use-sentiment-api';
 import { ResultCard } from './result-card';
 import { supabase } from '@/integrations/supabase/client';
+import type { AnalysisResult } from '../../types/sentiment';
 
 interface ScrapedData {
   content: string;
@@ -13,13 +14,18 @@ interface ScrapedData {
   sourceUrl: string;
 }
 
+type AnalysisMode = 'ml' | 'llm';
+
 export function UrlAnalyzer() {
   const [url, setUrl] = useState('');
   const [scraping, setScraping] = useState(false);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('llm');
+  const [llmResult, setLlmResult] = useState<AnalysisResult | null>(null);
+  const [llmLoading, setLlmLoading] = useState(false);
   
-  const { result, loading, error, analyze, reset } = useSentimentAnalysis();
+  const { result: mlResult, loading: mlLoading, error: mlError, analyze: analyzeML, reset: resetML } = useSentimentAnalysis();
 
   const handleScrapeAndAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +35,8 @@ export function UrlAnalyzer() {
     setScraping(true);
     setScrapeError(null);
     setScrapedData(null);
-    reset();
+    setLlmResult(null);
+    resetML();
 
     try {
       // Step 1: Scrape the URL using edge function
@@ -48,14 +55,17 @@ export function UrlAnalyzer() {
       const scraped = data.data as ScrapedData;
       setScrapedData(scraped);
 
-      // Step 2: Analyze the extracted content
-      // Take first 2000 characters for analysis to avoid too long text
-      const textToAnalyze = scraped.content.slice(0, 2000);
+      // Step 2: Analyze based on selected mode
+      const textToAnalyze = scraped.content.slice(0, 3000);
       
-      if (textToAnalyze.trim()) {
-        await analyze(textToAnalyze);
-      } else {
+      if (!textToAnalyze.trim()) {
         throw new Error('Konten yang diekstrak kosong');
+      }
+
+      if (analysisMode === 'llm') {
+        await analyzeLLM(textToAnalyze);
+      } else {
+        await analyzeML(textToAnalyze);
       }
     } catch (err) {
       console.error('Scrape and analyze error:', err);
@@ -65,20 +75,84 @@ export function UrlAnalyzer() {
     }
   };
 
+  const analyzeLLM = async (text: string) => {
+    setLlmLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-sentiment-llm', {
+        body: { text }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Gagal menganalisis dengan AI');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Gagal menganalisis sentimen');
+      }
+
+      setLlmResult(data.data as AnalysisResult);
+    } catch (err) {
+      console.error('LLM analysis error:', err);
+      setScrapeError(err instanceof Error ? err.message : 'Gagal menganalisis dengan AI');
+    } finally {
+      setLlmLoading(false);
+    }
+  };
+
   const handleReset = () => {
     setUrl('');
     setScrapedData(null);
     setScrapeError(null);
-    reset();
+    setLlmResult(null);
+    resetML();
   };
 
-  const isProcessing = scraping || loading;
+  const isProcessing = scraping || mlLoading || llmLoading;
+  const currentResult = analysisMode === 'llm' ? llmResult : mlResult;
+  const currentError = analysisMode === 'llm' ? scrapeError : (scrapeError || mlError);
 
   return (
     <div className="space-y-6">
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleScrapeAndAnalyze} className="space-y-4">
+            {/* Analysis Mode Toggle */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Mode Analisis</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAnalysisMode('llm')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                    analysisMode === 'llm'
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                      : 'border-muted bg-background hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <div className="text-left">
+                    <div className="text-sm font-medium">AI (LLM)</div>
+                    <div className="text-xs opacity-70">Gemini - Lebih akurat</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAnalysisMode('ml')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                    analysisMode === 'ml'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                      : 'border-muted bg-background hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <Brain className="h-4 w-4" />
+                  <div className="text-left">
+                    <div className="text-sm font-medium">ML Model</div>
+                    <div className="text-xs opacity-70">Naive Bayes - Cepat</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="url-input" className="text-sm font-medium">
                 URL Berita untuk dianalisis
@@ -109,7 +183,7 @@ export function UrlAnalyzer() {
                 {isProcessing ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {scraping ? 'Mengekstrak...' : 'Menganalisis...'}
+                    {scraping ? 'Mengekstrak...' : llmLoading ? 'AI Menganalisis...' : 'Menganalisis...'}
                   </>
                 ) : (
                   <>
@@ -119,7 +193,7 @@ export function UrlAnalyzer() {
                 )}
               </Button>
               
-              {(result || scrapedData || url) && (
+              {(currentResult || scrapedData || url) && (
                 <Button
                   type="button"
                   variant="outline"
@@ -133,8 +207,8 @@ export function UrlAnalyzer() {
               )}
             </div>
 
-            {(scrapeError || error) && (
-              <p className="text-sm text-destructive">{scrapeError || error}</p>
+            {currentError && (
+              <p className="text-sm text-destructive">{currentError}</p>
             )}
           </form>
         </CardContent>
@@ -180,7 +254,7 @@ export function UrlAnalyzer() {
       )}
 
       {/* Analysis Result */}
-      {result && <ResultCard result={result} />}
+      {currentResult && <ResultCard result={currentResult} />}
     </div>
   );
 }

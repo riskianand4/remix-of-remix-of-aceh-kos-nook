@@ -24,6 +24,9 @@ export interface AnalysisResult {
     negatif: number;
     netral: number;
   };
+  method?: 'ml' | 'llm';
+  model?: string;
+  reasoning?: string;
 }
 
 export interface DatasetItem {
