@@ -78,7 +78,7 @@ function generateSuratResmiHtml(doc: DocumentData, qrDataUrl: string): string {
   const kopSpacing = doc.kopSpacing || 8;
   const surat = doc.suratResmi || DEFAULT_SURAT_RESMI;
 
-  const hasKop = doc.kopText || doc.kopLogoDataUrl;
+  const hasKop = doc.kopText || doc.kopLogoDataUrl || doc.kopLogoRightDataUrl;
   const kopDividerHtml = kopDividerEnabled ? `<hr class="kop-divider" />` : "";
   const kopBlock = hasKop
     ? `
@@ -93,6 +93,7 @@ function generateSuratResmiHtml(doc: DocumentData, qrDataUrl: string): string {
       `
           : ""
       }
+      ${doc.kopLogoRightDataUrl ? `<img src="${doc.kopLogoRightDataUrl}" class="kop-logo" style="flex-shrink:0;" />` : ""}
     </div>
     ${kopDividerHtml}
   `
