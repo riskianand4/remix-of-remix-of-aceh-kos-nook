@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { accessReview, fetchComments, addComment, resolveComment, deleteComment, CommentApi } from '@/lib/api';
+import { accessReview, fetchComments, addComment, resolveComment, deleteComment, CommentApi, fetchDocument } from '@/lib/api';
 import { accessLocalReview, getLocalComments, addLocalComment, resolveLocalComment, deleteLocalComment, LocalComment } from '@/lib/share-storage';
 import { DocumentData } from '@/types/document';
 import { Button } from '@/components/ui/button';
@@ -35,25 +35,24 @@ function GateScreen({ code, onAccess }: { code: string; onAccess: (doc: Document
     try {
       const result = await accessReview(code, accessCode.trim());
       const cmts = await fetchComments(code);
-      // Try to load the latest saved version instead of the share snapshot
+      // Try to fetch the latest full document from API
+      let latestDoc = result.document;
       try {
-        const raw = localStorage.getItem(`ls_doc_${result.document.id}`);
-        const latestDoc = raw ? JSON.parse(raw) : result.document;
-        onAccess(latestDoc, result.shareCode, false, cmts);
+        const fetched = await fetchDocument(result.document.id);
+        if (fetched) latestDoc = fetched;
       } catch {
-        onAccess(result.document, result.shareCode, false, cmts);
+        // fallback to share snapshot
       }
+      onAccess(latestDoc, result.shareCode, false, cmts);
     } catch {
       const result = accessLocalReview(code, accessCode.trim());
       if ('error' in result) { setError(result.error); setLoading(false); return; }
       try {
-        const raw = localStorage.getItem(`ls_doc_${result.link.documentId}`);
-        if (raw) {
-          onAccess(JSON.parse(raw), code, true, getLocalComments(code));
-        } else {
-          setError('Dokumen tidak ditemukan di perangkat ini');
-        }
-      } catch { setError('Gagal memuat dokumen'); }
+        const fetched = await fetchDocument(result.link.documentId);
+        onAccess(fetched, code, true, getLocalComments(code));
+      } catch {
+        setError('Dokumen tidak ditemukan');
+      }
     } finally { setLoading(false); }
   };
 

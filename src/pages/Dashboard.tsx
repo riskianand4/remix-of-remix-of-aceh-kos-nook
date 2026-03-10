@@ -6,7 +6,7 @@ import {
   Plus, FileText, Copy, Trash2, Clock, CheckCircle, Search,
   LayoutGrid, List, Filter, ArrowUpDown, Calendar, MoreHorizontal,
   TrendingUp, Download, ShieldCheck,
-  FileUp, BookTemplate, CheckSquare, Save, Archive, Mail, Camera, Building2, Star
+  FileUp, BookTemplate, CheckSquare, Save, Archive, Mail, Camera, Building2, Star, Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,7 +22,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
 import { getDocuments, deleteDocument, duplicateDocument, saveDocument, getCustomTemplates, deleteCustomTemplate, saveCustomTemplate } from '@/lib/storage';
 import { CustomTemplate } from '@/lib/storage';
@@ -34,7 +34,7 @@ import { exportDocuments, exportSingleDocument, importDocuments } from '@/lib/ex
 
 import OnboardingWelcome from '@/components/OnboardingWelcome';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { createDocument } from '@/lib/api';
+import { createDocument, updateDocument } from '@/lib/api';
 
 type ViewMode = 'grid' | 'list';
 type SortMode = 'newest' | 'oldest' | 'title' | 'status';
@@ -62,6 +62,10 @@ export default function Dashboard() {
   const [favorites, setFavorites] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('favorite_templates') || '[]')); } catch { return new Set(); }
   });
+
+  // Rename state
+  const [renameTarget, setRenameTarget] = useState<{ id: string; title: string } | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => {
@@ -201,6 +205,18 @@ export default function Dashboard() {
     await duplicateDocument(id);
     await loadData();
     toast({ title: t('dashboard.docDuplicated') });
+  };
+
+  const handleRename = async () => {
+    if (!renameTarget || !renameValue.trim()) return;
+    try {
+      await updateDocument(renameTarget.id, { title: renameValue.trim() });
+      await loadData();
+      toast({ title: 'Nama dokumen diperbarui' });
+    } catch {
+      toast({ title: 'Gagal mengubah nama', variant: 'destructive' });
+    }
+    setRenameTarget(null);
   };
 
   const handleExportAll = () => {
@@ -412,6 +428,7 @@ export default function Dashboard() {
                       onDelete={() => setDeleteTarget(doc.id)}
                       onExport={() => { exportSingleDocument(doc); toast({ title: t('dashboard.docExported') }); }}
                       onSaveTemplate={() => { setSaveTemplateTarget(doc.id); setTemplateName(doc.title); }}
+                      onRename={() => { setRenameTarget({ id: doc.id, title: doc.title }); setRenameValue(doc.title || ''); }}
                       bulkMode={bulkMode}
                       selected={selectedIds.has(doc.id)}
                       onToggleSelect={() => toggleSelect(doc.id)}
@@ -438,6 +455,7 @@ export default function Dashboard() {
                       onDelete={() => setDeleteTarget(doc.id)}
                       onExport={() => { exportSingleDocument(doc); toast({ title: t('dashboard.docExported') }); }}
                       onSaveTemplate={() => { setSaveTemplateTarget(doc.id); setTemplateName(doc.title); }}
+                      onRename={() => { setRenameTarget({ id: doc.id, title: doc.title }); setRenameValue(doc.title || ''); }}
                       bulkMode={bulkMode}
                       selected={selectedIds.has(doc.id)}
                       onToggleSelect={() => toggleSelect(doc.id)}
@@ -639,6 +657,27 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Rename Dialog */}
+      <Dialog open={!!renameTarget} onOpenChange={() => setRenameTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ubah Nama Dokumen</DialogTitle>
+            <DialogDescription>Masukkan nama baru untuk dokumen ini.</DialogDescription>
+          </DialogHeader>
+          <Input
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            placeholder="Nama dokumen..."
+            onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+            autoFocus
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenameTarget(null)}>Batal</Button>
+            <Button onClick={handleRename} disabled={!renameValue.trim()}>Simpan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
@@ -653,8 +692,8 @@ export default function Dashboard() {
 /* ─── Sub-components ─── */
 
 
-function DocumentCard({ doc, onOpen, onDuplicate, onDelete, onExport, onSaveTemplate, bulkMode, selected, onToggleSelect }: {
-  doc: DocumentData; onOpen: () => void; onDuplicate: () => void; onDelete: () => void; onExport: () => void; onSaveTemplate: () => void;
+function DocumentCard({ doc, onOpen, onDuplicate, onDelete, onExport, onSaveTemplate, onRename, bulkMode, selected, onToggleSelect }: {
+  doc: DocumentData; onOpen: () => void; onDuplicate: () => void; onDelete: () => void; onExport: () => void; onSaveTemplate: () => void; onRename: () => void;
   bulkMode: boolean; selected: boolean; onToggleSelect: () => void;
 }) {
   return (
@@ -689,6 +728,7 @@ function DocumentCard({ doc, onOpen, onDuplicate, onDelete, onExport, onSaveTemp
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenuItem onClick={onOpen}><FileText className="mr-2 h-3.5 w-3.5" /> Open</DropdownMenuItem>
+                    <DropdownMenuItem onClick={onRename}><Pencil className="mr-2 h-3.5 w-3.5" /> Rename</DropdownMenuItem>
                     <DropdownMenuItem onClick={onDuplicate}><Copy className="mr-2 h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
                     <DropdownMenuItem onClick={onExport}><Download className="mr-2 h-3.5 w-3.5" /> Export</DropdownMenuItem>
                     <DropdownMenuItem onClick={onSaveTemplate}><Save className="mr-2 h-3.5 w-3.5" /> Simpan Template</DropdownMenuItem>
@@ -721,8 +761,8 @@ function DocumentCard({ doc, onOpen, onDuplicate, onDelete, onExport, onSaveTemp
   );
 }
 
-function DocumentListItem({ doc, onOpen, onDuplicate, onDelete, onExport, onSaveTemplate, bulkMode, selected, onToggleSelect }: {
-  doc: DocumentData; onOpen: () => void; onDuplicate: () => void; onDelete: () => void; onExport: () => void; onSaveTemplate: () => void;
+function DocumentListItem({ doc, onOpen, onDuplicate, onDelete, onExport, onSaveTemplate, onRename, bulkMode, selected, onToggleSelect }: {
+  doc: DocumentData; onOpen: () => void; onDuplicate: () => void; onDelete: () => void; onExport: () => void; onSaveTemplate: () => void; onRename: () => void;
   bulkMode: boolean; selected: boolean; onToggleSelect: () => void;
 }) {
   return (
@@ -763,6 +803,7 @@ function DocumentListItem({ doc, onOpen, onDuplicate, onDelete, onExport, onSave
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
               <DropdownMenuItem onClick={onOpen}><FileText className="mr-2 h-3.5 w-3.5" /> Open</DropdownMenuItem>
+              <DropdownMenuItem onClick={onRename}><Pencil className="mr-2 h-3.5 w-3.5" /> Rename</DropdownMenuItem>
               <DropdownMenuItem onClick={onDuplicate}><Copy className="mr-2 h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
               <DropdownMenuItem onClick={onExport}><Download className="mr-2 h-3.5 w-3.5" /> Export</DropdownMenuItem>
               <DropdownMenuItem onClick={onSaveTemplate}><Save className="mr-2 h-3.5 w-3.5" /> Simpan Template</DropdownMenuItem>
