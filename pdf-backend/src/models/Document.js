@@ -106,6 +106,7 @@ const DocumentSchema = new mongoose.Schema({
   coverLayout: { type: CoverLayoutSchema, default: () => ({}) },
   kopText: { type: String, default: '' },
   kopLogoDataUrl: String,
+  kopLogoRightDataUrl: String,
   kopLogoPosition: { type: String, default: 'left' },
   kopPosition: { type: String, default: 'top' },
   kopDividerEnabled: { type: Boolean, default: false },

@@ -189,6 +189,7 @@ export interface DocumentData {
   // KOP / Letterhead
   kopText: string;
   kopLogoDataUrl?: string;
+  kopLogoRightDataUrl?: string;
   kopLogoPosition: 'left' | 'center';
   kopPosition: 'top' | 'bottom' | 'both';
   kopDividerEnabled: boolean;

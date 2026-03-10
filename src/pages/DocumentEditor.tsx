@@ -60,7 +60,6 @@ const SURAT_RESMI_STEPS = [
 
 function isSuratResmi(doc: DocumentData): boolean {
   if (doc.documentType === 'surat-resmi') return true;
-  // Backward compat heuristic
   if (!doc.documentType) {
     const titleLower = doc.title?.toLowerCase() || '';
     return titleLower.includes('surat resmi') || titleLower.includes('surat');
@@ -85,11 +84,15 @@ export default function DocumentEditor() {
   const [splitView, setSplitView] = useState(false);
   const [showShare, setShowShare] = useState(false);
 
+  // Inline title editing
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
   const onboarding = useOnboarding();
   const history = useHistory<DocumentData>();
   const versionInterval = useRef<NodeJS.Timeout>();
 
-  // Determine which steps to show
   const STEPS = useMemo(() => doc && isSuratResmi(doc) ? SURAT_RESMI_STEPS : ALL_STEPS, [doc]);
 
   const saveFunc = useCallback(async () => {
@@ -123,7 +126,6 @@ export default function DocumentEditor() {
           navigate('/');
           return;
         }
-        // Ensure defaults
         if (!found.contentBlocks) found.contentBlocks = [];
         if (!found.docNumber) found.docNumber = '';
         if (found.revision === undefined) found.revision = 1;
@@ -253,6 +255,27 @@ export default function DocumentEditor() {
     }
   };
 
+  // Inline title editing handlers
+  const startTitleEdit = () => {
+    if (!doc) return;
+    setTitleDraft(doc.title || '');
+    setEditingTitle(true);
+    setTimeout(() => titleInputRef.current?.focus(), 50);
+  };
+
+  const saveTitleEdit = () => {
+    if (!doc) return;
+    const newTitle = titleDraft.trim();
+    if (newTitle !== doc.title) {
+      updateDoc({ title: newTitle });
+    }
+    setEditingTitle(false);
+  };
+
+  const cancelTitleEdit = () => {
+    setEditingTitle(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -268,7 +291,6 @@ export default function DocumentEditor() {
 
   const isSurat = isSuratResmi(doc);
 
-  // Map step index → component based on the active step set
   const renderStep = () => {
     const stepId = STEPS[currentStep]?.id;
     switch (stepId) {
@@ -294,14 +316,35 @@ export default function DocumentEditor() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Header toolbar - no step tabs */}
+      {/* Header toolbar */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 backdrop-blur px-4 py-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleBack} className="gap-1.5 text-xs h-8">
             <ChevronLeft className="h-4 w-4" /> Kembali
           </Button>
           <div className="h-4 w-px bg-border" />
-          <span className="text-xs text-muted-foreground truncate max-w-[200px]">{doc.title || 'Untitled'}</span>
+          {editingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onBlur={saveTitleEdit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveTitleEdit();
+                if (e.key === 'Escape') cancelTitleEdit();
+              }}
+              className="text-xs bg-transparent border-b border-primary outline-none px-1 py-0.5 max-w-[200px] text-foreground"
+              placeholder="Nama dokumen..."
+            />
+          ) : (
+            <span
+              className="text-xs text-muted-foreground truncate max-w-[200px] cursor-pointer hover:text-foreground transition-colors"
+              onDoubleClick={startTitleEdit}
+              title="Double-click untuk rename"
+            >
+              {doc.title || 'Untitled'}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           <TooltipProvider>
@@ -363,7 +406,7 @@ export default function DocumentEditor() {
         </div>
       </div>
 
-      {/* Main area: step icons left + editor + preview */}
+      {/* Main area */}
       <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 49px)' }}>
         {/* Vertical step icon strip */}
         <div className="flex flex-col items-center gap-1 border-r bg-muted/30 py-3 px-1.5 shrink-0 h-full overflow-y-auto">
@@ -405,132 +448,121 @@ export default function DocumentEditor() {
         {/* Editor + Preview */}
         {splitView ? (
           <ResizablePanelGroup direction="horizontal" className="flex-1">
-            <ResizablePanel defaultSize={55} minSize={35}>
-              <div className="p-6 lg:p-10 overflow-y-auto h-full">
+            <ResizablePanel defaultSize={55} minSize={30}>
+              <div className="h-full overflow-y-auto p-6">
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={`${currentStep}-${undoRedoKey}`}
+                    key={currentStep}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.15 }}
                   >
                     {renderStepWithTour()}
                   </motion.div>
                 </AnimatePresence>
-                <div className="mt-8 flex items-center justify-between border-t pt-6">
-                  <Button variant="outline" onClick={() => handleStepChange(currentStep - 1)} disabled={currentStep === 0} className="gap-2">
-                    <ChevronLeft className="h-4 w-4" /> {t('editor.previous')}
-                  </Button>
-                  <span className="text-xs text-muted-foreground">{currentStep + 1} / {STEPS.length}</span>
-                  <Button onClick={() => handleStepChange(currentStep + 1)} disabled={currentStep === STEPS.length - 1} className="gap-2">
-                    {t('editor.next')} <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={45} minSize={25}>
-              <div className="h-full overflow-auto">
-                <LivePreview doc={doc} currentStepId={STEPS[currentStep]?.id} />
-              </div>
+              <LivePreview doc={doc} />
             </ResizablePanel>
           </ResizablePanelGroup>
         ) : (
-          <div className="flex-1 h-full overflow-y-auto">
-            <div className="mx-auto max-w-8xl p-6 lg:p-10">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${currentStep}-${undoRedoKey}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {renderStepWithTour()}
-                </motion.div>
-              </AnimatePresence>
-              <div className="mt-8 flex items-center justify-between border-t pt-6">
-                <Button variant="outline" onClick={() => handleStepChange(currentStep - 1)} disabled={currentStep === 0} className="gap-2">
-                  <ChevronLeft className="h-4 w-4" /> {t('editor.previous')}
-                </Button>
-                <span className="text-xs text-muted-foreground">{currentStep + 1} / {STEPS.length}</span>
-                <Button onClick={() => handleStepChange(currentStep + 1)} disabled={currentStep === STEPS.length - 1} className="gap-2">
-                  {t('editor.next')} <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+          <div className="flex-1 overflow-y-auto p-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                {renderStepWithTour()}
+              </motion.div>
+            </AnimatePresence>
           </div>
         )}
       </div>
 
-      <CommandPalette
-        isEditor
-        steps={STEPS}
-        onStepChange={handleStepChange}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onPreview={handlePreviewShortcut}
-      />
+      {/* Bottom nav */}
+      <div className="sticky bottom-0 z-30 flex items-center justify-between border-t bg-background/95 backdrop-blur px-4 py-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs h-8"
+          onClick={() => handleStepChange(currentStep - 1)}
+          disabled={currentStep === 0}
+        >
+          <ChevronLeft className="h-3.5 w-3.5" /> Sebelumnya
+        </Button>
+        <div className="flex items-center gap-1">
+          {STEPS.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleStepChange(idx)}
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-300',
+                idx === currentStep ? 'w-6 bg-primary' : 'w-1.5 bg-border hover:bg-muted-foreground/30'
+              )}
+            />
+          ))}
+        </div>
+        <Button
+          variant={currentStep === STEPS.length - 1 ? 'default' : 'outline'}
+          size="sm"
+          className="gap-1.5 text-xs h-8"
+          onClick={() => handleStepChange(currentStep + 1)}
+          disabled={currentStep === STEPS.length - 1}
+        >
+          Selanjutnya <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
+      </div>
 
+      {/* Dialogs */}
       <ConfirmDialog
         open={showBackConfirm}
         onOpenChange={setShowBackConfirm}
         title={t('editor.exitEditor')}
-        description={t('editor.exitEditorDesc')}
+        description={t('editor.exitConfirm')}
         onConfirm={() => navigate('/')}
-        confirmLabel={t('editor.exit')}
-        variant="destructive"
       />
 
       <KeyboardShortcutsDialog open={showShortcuts} onOpenChange={setShowShortcuts} />
+      <CommandPalette />
 
-      {/* Save as Template Dialog */}
       <Dialog open={showSaveTemplate} onOpenChange={setShowSaveTemplate}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Simpan sebagai Template</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 py-2">
-            <div className="space-y-1.5">
-              <Label className="text-sm">Nama Template</Label>
-              <Input value={templateName} onChange={e => setTemplateName(e.target.value)} placeholder="Nama template..." />
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Nama</Label>
+              <Input value={templateName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemplateName(e.target.value)} placeholder="cth: Laporan Proyek" />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm">Deskripsi</Label>
-              <Textarea value={templateDesc} onChange={e => setTemplateDesc(e.target.value)} placeholder="Deskripsi singkat..." rows={2} />
+            <div>
+              <Label className="text-xs">Deskripsi (opsional)</Label>
+              <Input value={templateDesc} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemplateDesc(e.target.value)} placeholder="cth: Template standar" />
             </div>
+            <Button className="w-full" disabled={!templateName.trim()} onClick={async () => {
+              await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
+              setShowSaveTemplate(false);
+              toast({ title: 'Template tersimpan!' });
+            }}>
+              Simpan
+            </Button>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSaveTemplate(false)}>Batal</Button>
-            <Button onClick={async () => {
-              if (!templateName.trim()) {
-                toast({ title: 'Nama template wajib diisi', variant: 'destructive' });
-                return;
-              }
-              const ok = await saveCustomTemplate(doc, templateName, templateDesc);
-              if (ok) {
-                toast({ title: '✓ Template berhasil disimpan!', duration: 2000 });
-                setShowSaveTemplate(false);
-              }
-            }}>Simpan</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {onboarding.showTour && onboarding.currentStep && (
-        <OnboardingTour
-          show={onboarding.showTour}
-          step={onboarding.currentStep}
-          currentIndex={onboarding.currentTourStep}
-          totalSteps={onboarding.totalSteps}
-          onNext={onboarding.nextStep}
-          onPrev={onboarding.prevStep}
-          onSkip={onboarding.skipTour}
-        />
-      )}
+      <ShareDialog open={showShare} onOpenChange={setShowShare} doc={doc} />
 
-      <ShareDialog doc={doc} open={showShare} onOpenChange={setShowShare} />
+      <OnboardingTour
+        active={onboarding.showTour}
+        onComplete={onboarding.completeOnboarding}
+        onSkip={onboarding.completeOnboarding}
+      />
     </div>
   );
 }

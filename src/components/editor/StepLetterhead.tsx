@@ -25,6 +25,7 @@ interface Props {
 
 export default function StepLetterhead({ doc, updateDoc }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [uploadingRight, setUploadingRight] = useState(false);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,6 +38,20 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
       toast({ title: "Gagal memproses gambar", variant: "destructive" });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleRightLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingRight(true);
+    try {
+      const dataUrl = await normalizeImage(file, 400);
+      updateDoc({ kopLogoRightDataUrl: dataUrl });
+    } catch {
+      toast({ title: "Gagal memproses gambar", variant: "destructive" });
+    } finally {
+      setUploadingRight(false);
     }
   };
 
@@ -74,14 +89,15 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* Left Logo */}
             <div className="space-y-2">
-              <Label>Logo KOP</Label>
+              <Label>Logo Kiri</Label>
               {doc.kopLogoDataUrl
                 ? (
                   <div className="relative flex h-20 w-40 items-center justify-center rounded-lg border bg-muted/30 p-2">
                     <img
                       src={doc.kopLogoDataUrl}
-                      alt="Logo KOP"
+                      alt="Logo Kiri"
                       className="max-h-full max-w-full object-contain"
                     />
                     <Button
@@ -97,15 +113,11 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
                 : (
                   <label className="flex h-20 w-40 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/20 transition-colors hover:bg-muted/40">
                     {uploading
-                      ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                      )
+                      ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       : (
                         <>
                           <Upload className="mb-1 h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            Upload
-                          </span>
+                          <span className="text-xs text-muted-foreground">Upload</span>
                         </>
                       )}
                     <input
@@ -118,22 +130,64 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
                   </label>
                 )}
             </div>
+            {/* Right Logo */}
             <div className="space-y-2">
-              <Label>Posisi Logo</Label>
-              <Select
-                value={logoPos}
-                onValueChange={(v) =>
-                  updateDoc({ kopLogoPosition: v as "left" | "center" })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="left">Kiri (Horizontal)</SelectItem>
-                  <SelectItem value="center">Tengah (Vertikal)</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Logo Kanan</Label>
+              {doc.kopLogoRightDataUrl
+                ? (
+                  <div className="relative flex h-20 w-40 items-center justify-center rounded-lg border bg-muted/30 p-2">
+                    <img
+                      src={doc.kopLogoRightDataUrl}
+                      alt="Logo Kanan"
+                      className="max-h-full max-w-full object-contain"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -right-2 -top-2 h-6 w-6"
+                      onClick={() => updateDoc({ kopLogoRightDataUrl: undefined })}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )
+                : (
+                  <label className="flex h-20 w-40 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/20 transition-colors hover:bg-muted/40">
+                    {uploadingRight
+                      ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      : (
+                        <>
+                          <Upload className="mb-1 h-4 w-4 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Upload</span>
+                        </>
+                      )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleRightLogoUpload}
+                      disabled={uploadingRight}
+                    />
+                  </label>
+                )}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Posisi Teks KOP</Label>
+            <Select
+              value={logoPos}
+              onValueChange={(v) =>
+                updateDoc({ kopLogoPosition: v as "left" | "center" })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="left">Kiri (Horizontal)</SelectItem>
+                <SelectItem value="center">Tengah (Vertikal)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* KOP Position */}
@@ -188,7 +242,7 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
             />
           </div>
 
-          {(doc.kopText || doc.kopLogoDataUrl) && (
+          {(doc.kopText || doc.kopLogoDataUrl || doc.kopLogoRightDataUrl) && (
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">
                 Preview KOP
@@ -198,8 +252,8 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
                   {doc.kopLogoDataUrl && (
                     <img
                       src={doc.kopLogoDataUrl}
-                      alt="Logo"
-                      className="h-20 object-contain shrink-0"
+                      alt="Logo Kiri"
+                      className="h-16 object-contain shrink-0"
                     />
                   )}
                   {kopLines.length > 0 && (
@@ -216,6 +270,13 @@ export default function StepLetterhead({ doc, updateDoc }: Props) {
                         </span>
                       ))}
                     </div>
+                  )}
+                  {doc.kopLogoRightDataUrl && (
+                    <img
+                      src={doc.kopLogoRightDataUrl}
+                      alt="Logo Kanan"
+                      className="h-16 object-contain shrink-0"
+                    />
                   )}
                 </div>
                 {doc.kopDividerEnabled && (
