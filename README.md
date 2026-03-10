@@ -1,153 +1,73 @@
-# Sentiment Analysis PIM (Pupuk Iskandar Muda)
+# Welcome to your Lovable project
 
-Aplikasi analisis sentimen publik untuk PT Pupuk Iskandar Muda menggunakan Machine Learning (Naive Bayes) dengan frontend React dan backend Flask.
+## Project info
 
-## 📁 Struktur Proyek
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-```
-project/
-├── backend/                    # Backend Flask REST API
-│   ├── app.py                 # Server utama
-│   ├── preprocessing.py       # Script preprocessing data
-│   ├── training.py           # Script training model
-│   ├── evaluasi.py           # Script evaluasi model
-│   ├── visualisasi.py        # Script visualisasi data
-│   ├── requirements.txt      # Dependencies Python
-│   ├── model/
-│   │   ├── model_nb.pkl      # Model Naive Bayes
-│   │   └── vectorizer.pkl    # TF-IDF Vectorizer
-│   └── data/
-│       ├── data_sentimen.csv # Dataset mentah
-│       └── data_bersih.csv   # Dataset yang sudah dipreprocess
-│
-├── src/                       # Frontend React
-│   ├── components/           # Komponen UI
-│   ├── hooks/                # Custom React hooks
-│   ├── lib/                  # Utilities dan API client
-│   ├── pages/                # Halaman aplikasi
-│   └── types/                # TypeScript types
-│
-├── package.json              # Dependencies Node.js
-└── vite.config.ts           # Konfigurasi Vite
-```
+## How can I edit this code?
 
-## 🚀 Cara Menjalankan
+There are several ways of editing your application.
 
-### 1. Setup Backend
+**Use Lovable**
 
-```bash
-# Masuk ke folder backend
-cd backend
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-# Install dependencies Python
-pip install -r requirements.txt
+Changes made via Lovable will be committed automatically to this repo.
 
-# Jalankan server Flask
-python app.py
-```
+**Use your preferred IDE**
 
-Server backend akan berjalan di: **http://localhost:5000**
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-### 2. Setup Frontend
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-```bash
-# Kembali ke root folder (jika di backend)
-cd ..
+Follow these steps:
 
-# Install dependencies Node.js
-npm install
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-# Jalankan development server
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-Aplikasi frontend akan berjalan di: **http://localhost:8080**
+**Edit a file directly in GitHub**
 
-### 3. Konfigurasi Environment (Opsional)
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-Jika backend berjalan di URL yang berbeda, buat file `.env` di root folder:
+**Use GitHub Codespaces**
 
-```env
-VITE_API_URL=http://localhost:5000
-```
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## 📡 API Endpoints
+## What technologies are used for this project?
 
-| Method | Endpoint | Deskripsi |
-|--------|----------|-----------|
-| GET | `/api/stats` | Statistik sentimen dari dataset |
-| POST | `/api/analyze` | Analisis sentimen teks baru |
-| GET | `/api/dataset` | Ambil semua data training |
-| GET | `/api/mentions` | Ambil mentions dengan pagination |
-| GET | `/api/health` | Health check server |
+This project is built with:
 
-### Contoh Request
-
-**Analisis Teks:**
-```bash
-curl -X POST http://localhost:5000/api/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Pupuk PIM sangat bagus untuk tanaman saya"}'
-```
-
-**Response:**
-```json
-{
-  "text": "Pupuk PIM sangat bagus untuk tanaman saya",
-  "sentiment": "positif",
-  "confidence": 0.89,
-  "probabilities": {
-    "positif": 0.89,
-    "negatif": 0.05,
-    "netral": 0.06
-  }
-}
-```
-
-## 🤖 Training Model
-
-Jika ingin melatih ulang model dengan data baru:
-
-```bash
-cd backend
-
-# 1. Preprocessing data
-python preprocessing.py
-
-# 2. Training model
-python training.py
-
-# 3. Evaluasi model
-python evaluasi.py
-
-# 4. Visualisasi (opsional)
-python visualisasi.py
-```
-
-## 📊 Fitur Aplikasi
-
-- **Dashboard**: Statistik sentimen real-time dengan chart
-- **Analisis**: Input teks untuk analisis sentimen
-- **Dataset**: Lihat dan filter data training
-- **Tentang**: Informasi tentang aplikasi
-
-## 🛠️ Teknologi
-
-**Frontend:**
-- React 19
+- Vite
 - TypeScript
+- React
+- shadcn-ui
 - Tailwind CSS
-- Recharts (visualisasi)
-- React Router
 
-**Backend:**
-- Flask
-- Pandas
-- Scikit-learn (Naive Bayes)
-- NLTK (preprocessing)
+## How can I deploy this project?
 
-## 📝 Catatan
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
-- Pastikan backend sudah berjalan sebelum membuka frontend
-- Model sudah di-training dan siap digunakan
-- Dataset berisi contoh sentimen terkait PT Pupuk Iskandar Muda
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
