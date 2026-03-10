@@ -559,9 +559,13 @@ export default function DocumentEditor() {
       <ShareDialog open={showShare} onOpenChange={setShowShare} doc={doc} />
 
       <OnboardingTour
-        active={onboarding.showTour}
-        onComplete={onboarding.completeOnboarding}
-        onSkip={onboarding.completeOnboarding}
+        show={onboarding.showTour}
+        step={TOUR_STEPS[onboarding.currentTourStep]}
+        currentIndex={onboarding.currentTourStep}
+        totalSteps={TOUR_STEPS.length}
+        onNext={onboarding.nextStep}
+        onPrev={onboarding.prevStep}
+        onSkip={onboarding.skipTour}
       />
     </div>
   );
