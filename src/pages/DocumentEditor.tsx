@@ -32,7 +32,7 @@ import { CommandPalette } from '@/components/CommandPalette';
 import { useHistory } from '@/hooks/useHistory';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { useOnboarding } from '@/hooks/useOnboarding';
+import { useOnboarding, TOUR_STEPS } from '@/hooks/useOnboarding';
 import { saveVersion } from '@/lib/versioning';
 
 import BackendStatus from '@/components/BackendStatus';
