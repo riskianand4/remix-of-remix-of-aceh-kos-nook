@@ -238,6 +238,9 @@ export interface DocumentData {
   suratResmi: SuratResmiData;
 
   // Meta
+  // Signature layout
+  signatureNewPage: boolean;
+
   status: 'draft' | 'finished';
   createdAt: string;
   updatedAt: string;
