@@ -699,28 +699,59 @@ const kopBlock = hasKop
         const sigSize = s.signatureSize || 80;
         const stpSize = s.stampSize || 100;
         const containerH = Math.max(sigSize, stpSize) + 10;
+        const titleAboveHtml = s.titleAbove
+          ? s.titleAbove
+              .split("\n")
+              .map(
+                (line) =>
+                  `<p class="signee-title-above">${escapeHtml(line)}</p>`,
+              )
+              .join("")
+          : "";
         return `
       <div class="signee-block">
+        ${titleAboveHtml}
         <div class="signee-images" style="min-height:${containerH}px;overflow:visible;">
           ${s.stampDataUrl ? `<img src="${s.stampDataUrl}" class="stamp-image" style="max-height:${stpSize}px;" />` : ""}
           ${s.signatureDataUrl ? `<img src="${s.signatureDataUrl}" class="signature-image" style="max-height:${sigSize}px;" />` : ""}
         </div>
+        <div class="signee-line"></div>
         <p class="signee-name">${escapeHtml(s.name || "_______________")}</p>
         <p class="signee-role">${escapeHtml(s.role || "")}</p>
+        ${s.nip ? `<p class="signee-nip">${escapeHtml(s.nip)}</p>` : ""}
       </div>
     `;
       })
       .join("");
 
-    pages.push(`
-      <div class="page" data-section="signatures">
-        ${watermarkHtml}
-        ${kopTop}
-        <div class="signatures-container">${signeesHtml}</div>
-        ${doc.qrEnabled !== false && doc.docCode ? buildQrBlock(doc.docCode, qrDataUrl) : ""}
-        ${kopBottom}
-      </div>
-    `);
+    const sigContent = `<div class="signatures-container">${signeesHtml}</div>
+        ${doc.qrEnabled !== false && doc.docCode ? buildQrBlock(doc.docCode, qrDataUrl) : ""}`;
+
+    if (doc.signatureNewPage !== false) {
+      // New page for signatures (default)
+      pages.push(`
+        <div class="page" data-section="signatures">
+          ${watermarkHtml}
+          ${kopTop}
+          ${sigContent}
+          ${kopBottom}
+        </div>
+      `);
+    } else {
+      // Append to last page if possible
+      if (pages.length > 0) {
+        const lastPage = pages[pages.length - 1];
+        // Insert before the closing kopBottom + </div>
+        const insertPoint = lastPage.lastIndexOf('</div>');
+        if (insertPoint > -1) {
+          pages[pages.length - 1] = lastPage.slice(0, insertPoint) + sigContent + lastPage.slice(insertPoint);
+        } else {
+          pages.push(`<div class="page" data-section="signatures">${watermarkHtml}${kopTop}${sigContent}${kopBottom}</div>`);
+        }
+      } else {
+        pages.push(`<div class="page" data-section="signatures">${watermarkHtml}${kopTop}${sigContent}${kopBottom}</div>`);
+      }
+    }
   }
 
   // Calculate page numbers for TOC
