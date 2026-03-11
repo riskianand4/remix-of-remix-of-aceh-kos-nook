@@ -64,6 +64,17 @@ export default function StepSignatures({ doc, updateDoc }: Props) {
         </Button>
       </div>
 
+      <div className="flex items-center gap-3 rounded-md border p-3 bg-muted/30">
+        <Switch
+          id="signatureNewPage"
+          checked={doc.signatureNewPage !== false}
+          onCheckedChange={(checked) => updateDoc({ signatureNewPage: checked })}
+        />
+        <Label htmlFor="signatureNewPage" className="text-sm cursor-pointer">
+          Tanda tangan di halaman baru
+        </Label>
+      </div>
+
       {doc.signees.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">

@@ -477,6 +477,10 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
             <Label className="text-xs">Lebar Kolom Label ({selectedTable.keyWidth || 35}%)</Label>
             <Slider value={[selectedTable.keyWidth || 35]} min={10} max={60} step={5} onValueChange={([v]) => updateTableElement(selectedTable.id, { keyWidth: v })} />
           </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Warna Teks</Label>
+            <Input type="color" value={selectedTable.color || '#000000'} onChange={(e) => updateTableElement(selectedTable.id, { color: e.target.value })} className="h-8 w-16 p-1" />
+          </div>
           <p className="text-[10px] text-muted-foreground">X: {Math.round(selectedTable.pos.x)}%, Y: {Math.round(selectedTable.pos.y)}%</p>
         </div>
       )}
