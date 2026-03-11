@@ -292,13 +292,13 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
                 style={{
                   fontSize: `${Math.max(7, el.fontSize / 2.5)}px`,
                   fontWeight: el.bold ? 'bold' : 'normal',
+                  color: el.color || '#000000',
                   whiteSpace: 'pre-wrap',
                   wordWrap: 'break-word',
                   textAlign: 'center',
                   lineHeight: 1.3,
                   margin: 0,
                 }}
-                className="text-foreground"
               >
                 {el.text || '...'}
               </p>
