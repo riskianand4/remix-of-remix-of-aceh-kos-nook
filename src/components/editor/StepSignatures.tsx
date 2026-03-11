@@ -11,6 +11,7 @@ import DraggableList, { DragHandle } from '@/components/editor/DraggableList';
 import ConfirmDialog from '@/components/editor/ConfirmDialog';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 
 interface Props {
   doc: DocumentData;
