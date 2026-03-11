@@ -406,10 +406,11 @@ function generateDokumentasiHtml(doc: DocumentData, qrDataUrl: string): string {
     const textElementsHtml = (layout.textElements || [])
       .map((el) => {
         const elWidth = el.width || 80;
+        const elColor = el.color || '#000000';
         const textHtml = escapeHtml(el.text.trim()).replace(/\n/g, "<br/>");
         return `
       <div class="cover-element" style="left:${el.pos.x}%;top:${el.pos.y}%;width:${elWidth}%;">
-        <p style="font-size:${el.fontSize}pt;font-weight:${el.bold ? "bold" : "normal"};color:${theme.bodyColor};font-family:${theme.fontFamily};line-height:1.3;margin:0;word-wrap:break-word;text-align:center;">
+        <p style="font-size:${el.fontSize}pt;font-weight:${el.bold ? "bold" : "normal"};color:${elColor};font-family:${theme.fontFamily};line-height:1.3;margin:0;word-wrap:break-word;text-align:center;">
           ${textHtml}
         </p>
       </div>
