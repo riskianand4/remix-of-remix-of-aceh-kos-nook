@@ -314,9 +314,9 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
                 <tbody>
                   {(tbl.rows || []).map((row, i) => (
                     <tr key={i}>
-                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', textAlign: 'left', whiteSpace: 'nowrap', }}>{row.key}</td>
-                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, padding: '0 3px', whiteSpace: 'nowrap' }}>:</td>
-                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', textAlign: 'left' }}>{row.value || '...'}</td>
+                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', color: tbl.color || '#000000', textAlign: 'left', whiteSpace: 'nowrap', }}>{row.key}</td>
+                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, padding: '0 3px', color: tbl.color || '#000000', whiteSpace: 'nowrap' }}>:</td>
+                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', color: tbl.color || '#000000', textAlign: 'left' }}>{row.value || '...'}</td>
                     </tr>
                   ))}
                 </tbody>
