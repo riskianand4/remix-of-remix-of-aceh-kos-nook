@@ -54,6 +54,7 @@ const CoverTextElementSchema = new mongoose.Schema({
   text: { type: String, default: '' },
   fontSize: { type: Number, default: 14 },
   bold: { type: Boolean, default: false },
+  color: { type: String, default: '#000000' },
   pos: { x: { type: Number, default: 50 }, y: { type: Number, default: 50 } },
   width: { type: Number, default: 80 },
 }, { _id: false });
@@ -126,6 +127,7 @@ const DocumentSchema = new mongoose.Schema({
   contentBlocks: [mongoose.Schema.Types.Mixed],
   tables: [TableSchema],
   signees: [SigneeSchema],
+  signatureNewPage: { type: Boolean, default: true },
   customTheme: { type: CustomThemeSchema, default: () => ({}) },
   coverLineSpacing: { type: Number, default: 1.5 },
   contentLineSpacing: { type: Number, default: 1.5 },

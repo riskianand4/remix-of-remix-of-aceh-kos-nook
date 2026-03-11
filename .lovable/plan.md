@@ -1,69 +1,76 @@
 
 
-# Plan: Fix 6 Issues — Toast, Cover Theme, Signatures, PDF
+# Fix Cover Issues, Add TOC Toggle, Tabular Content, Template Fixes
 
-## 1. Toast on 429 Rate Limit
-**File:** `src/lib/api.ts`
-- In `request()` function, detect 429 status and show toast "Terlalu banyak permintaan. Silakan coba beberapa saat lagi." before throwing
-- Import toast from `@/hooks/use-toast`
+## Issues to Fix
 
-## 2. Cover Preview Dark Mode Fix
-**File:** `src/components/editor/CoverDesigner.tsx`
-- The cover canvas already has `bg-white` but text elements use `className="text-foreground"` (line 301) which turns white in dark mode
-- Fix: replace `text-foreground` with explicit `text-black` or use inline `style={{ color: el.color || '#000000' }}`
-- Same fix for table elements text color
+### 1. Cover Image Not Showing
+`CoverDesigner.tsx` uses `compressImage()` which returns a data URL, but the `<img>` tag renders blank. The issue is the image element width calculation uses `el.width * 4.2` which produces tiny pixel values. Need to use percentage-based width relative to the container instead.
 
-## 3. Custom Color for Cover Text Elements
-**Files:** `src/types/document.ts`, `src/components/editor/CoverDesigner.tsx`, `src/lib/pdf-builder.ts`, `pdf-backend/src/models/Document.js`
-- Add `color?: string` to `CoverTextElement` interface (default `#000000`)
-- Add `color?: string` to `CoverTableElement` interface
-- In CoverDesigner properties panel for text: add color input
-- In pdf-builder: use `el.color || '#000000'` instead of `theme.bodyColor` for cover text/table elements
+### 2. Logo & Image Shrinking When Dragged Right
+The `transform: translate(-50%, -50%)` centers elements, but elements near edges overflow the container (which has `overflow: hidden`). Fix: clamp positions accounting for element width, and remove `overflow: hidden` or use `overflow: visible` with `clip-path` only on the outer boundary.
 
-## 4. Signatures Missing titleAbove & NIP in Dokumentasi PDF
-**File:** `src/lib/pdf-builder.ts` (lines 696-712)
-- The `generateDokumentasiHtml` signee block is missing `titleAbove` and `nip` fields
-- The `generateSuratResmiHtml` version (lines 200-222) correctly includes them
-- Fix: add `titleAboveHtml` and `nip` rendering to the dokumentasi signee block, matching the surat-resmi version
+### 3. Logo Width Control
+Logos currently only have `coverLogoSize` (height). Add a `logoWidth` percentage control to `CoverLayout` so logos behave like text/image elements with width control, preventing shrinking at edges.
 
-## 5. Signature Page Break Control
-**Files:** `src/types/document.ts`, `src/components/editor/StepSignatures.tsx`, `src/lib/pdf-builder.ts`
-- Add `signatureNewPage?: boolean` to `DocumentData` (default `true`)
-- In StepSignatures: add a Switch "Tanda tangan di halaman baru"
-- In pdf-builder dokumentasi: if `signatureNewPage === false`, append signatures to the last content/table page instead of creating a new `.page` div
-- In pdf-builder surat-resmi: same logic — if false, keep signatures inline (already inline in single page)
+### 4. TOC/Daftar Gambar/Daftar Tabel Toggles
+Add three boolean fields to `DocumentData`:
+- `includeToc` (default: true)
+- `includeImageList` (default: true)  
+- `includeTableList` (default: true)
 
-## 6. PDF Download Differs from Preview
-**File:** `src/lib/pdf-builder.ts`
-- Root cause: Puppeteer uses `@page` margin AND `.page` has padding, causing double margins. Also `min-height: 100vh` creates issues when Puppeteer breaks pages.
-- Fix the `@media print` section: when printing, `.page` should have `padding: 0` (already there) BUT the `@page` margins are applied. The issue is that `min-height: 100vh` forces each div to fill a page even if nearly empty.
-- Remove `min-height: 100vh` from `.page` for print, use `page-break-after: always` alone
-- Ensure content pages that overflow naturally break without inserting blank KOP-only pages
-- Change `.page` to use `page-break-inside: avoid` only for small sections, allow large content to flow across print pages
+Add toggles in `StepCover.tsx` (under page settings). Update `pdf-builder.ts` to conditionally render these sections.
 
-**Also in `src/lib/pdf-builder.ts`:** The real fix is that Puppeteer already handles `@page` margins — so the HTML should NOT have padding on `.page` when going through Puppeteer. Add a `data-render="puppeteer"` attribute or pass a flag, but simpler: just ensure the `@media print` rules are correct since Puppeteer uses print rendering.
-
-Updated approach for print CSS:
-```css
-@media print {
-  .page {
-    padding: 0;
-    min-height: auto;
-    page-break-after: always;
-    overflow: visible;
-  }
-  .page:last-child { page-break-after: auto; }
-}
+### 5. Tabular Data in Content (Nama : Value format)
+Add a new content block type `'fields'` for key-value data like official letters. Interface:
 ```
+FieldsBlock { type: 'fields'; id; title; fields: { key: string; value: string }[] }
+```
+Update `ContentBlock = TextBlock | FieldsBlock`. Add UI in `StepContent.tsx` with "Tambah Data Fields" button. Render in `pdf-builder.ts` as aligned table without borders.
 
-## File Summary
+### 6. Template Save Bug
+The save in `StepPreview.tsx` looks correct. The Dashboard save may fail because `saveTemplateTarget` is set but `templateName` starts empty. Need to verify the flow works — likely the issue is that clicking "Simpan Template" from the dropdown sets `saveTemplateTarget` but the dialog doesn't show because state isn't properly initialized. Actually looking at code, the Dashboard dialog uses `!!saveTemplateTarget` as open condition and has proper input — seems fine. Let me check if `safeSetItem` silently fails due to quota. Will add error feedback.
+
+### 7. Remove "Laporan Keuangan" Template
+Remove the `financial-report` entry from `TEMPLATES` array in `src/lib/templates.ts`.
+
+### 8. Cover Precision — Use Percentage Width for All Elements
+In `CoverDesigner.tsx`, change element rendering from pixel-based width (`el.width * 4.2px`) to percentage-based width (`${el.width}%` of container). This matches what `pdf-builder.ts` does, ensuring WYSIWYG precision.
+
+## Files Changed
 
 | File | Changes |
 |------|---------|
-| `src/lib/api.ts` | Add 429 toast notification |
-| `src/components/editor/CoverDesigner.tsx` | Fix dark mode text color, add color picker |
-| `src/types/document.ts` | Add `color` to CoverTextElement/CoverTableElement, add `signatureNewPage` to DocumentData |
-| `src/lib/pdf-builder.ts` | Fix cover text color, add titleAbove/nip to dokumentasi signatures, signature page break control, fix print CSS for PDF |
-| `src/components/editor/StepSignatures.tsx` | Add signature page break toggle |
-| `pdf-backend/src/models/Document.js` | Add color fields to cover schemas, add signatureNewPage |
+| `src/types/document.ts` | Add `FieldsBlock`, `includeToc`, `includeImageList`, `includeTableList` fields |
+| `src/components/editor/CoverDesigner.tsx` | Fix image display (use % width), fix logo width, remove overflow:hidden, clamp positions |
+| `src/components/editor/StepCover.tsx` | Add TOC/image list/table list toggles |
+| `src/components/editor/StepContent.tsx` | Add "Tambah Data Fields" block type with key-value UI |
+| `src/lib/pdf-builder.ts` | Conditional TOC/lists, render FieldsBlock as aligned key:value, fix cover image rendering |
+| `src/lib/templates.ts` | Remove `financial-report` template, set `includeCover: false` properly for surat resmi |
+| `src/pages/DocumentEditor.tsx` | Add defaults for new fields |
+| `src/lib/storage.ts` | Add error toast feedback on save failure |
+
+## Detail per Section
+
+### CoverDesigner Fix
+- All draggable elements use `style={{ width: \`${el.width}%\` }}` of container (not pixel calc)
+- Container: `overflow: visible` with a wrapper that clips
+- Logo group gets a width slider in properties panel
+- Image `<img>` uses `width: 100%` inside its container div which uses percentage width
+
+### FieldsBlock for Official Letter Data
+```
+Nama             : Rizki Ananda
+NIM              : 2022573010115
+```
+Rendered as:
+```html
+<table class="fields-table">
+  <tr><td class="field-key">Nama</td><td>:</td><td>Rizki Ananda</td></tr>
+</table>
+```
+CSS: no borders, fixed key column width, monospace-like alignment.
+
+### TOC Toggles
+Three switches in StepCover.tsx under "Pengaturan Halaman" card. In `pdf-builder.ts`, wrap TOC page generation with `if (doc.includeToc !== false)`, image list with `if (doc.includeImageList !== false)`, and add a table list page with `if (doc.includeTableList !== false)`.
 

@@ -88,6 +88,7 @@ export interface CoverTextElement {
   text: string;
   fontSize: number; // pt
   bold: boolean;
+  color?: string; // hex color, default '#000000'
   pos: CoverElementPos;
   width: number; // percentage 10-100, default 80
 }
@@ -111,6 +112,7 @@ export interface CoverTableElement {
   width: number; // percentage 10-100, default 60
   fontSize: number; // pt, default 12
   bold: boolean;
+  color?: string; // hex color, default '#000000'
   keyWidth: number; // percentage of table width for key column, default 35
 }
 
@@ -236,6 +238,9 @@ export interface DocumentData {
   suratResmi: SuratResmiData;
 
   // Meta
+  // Signature layout
+  signatureNewPage: boolean;
+
   status: 'draft' | 'finished';
   createdAt: string;
   updatedAt: string;
@@ -319,6 +324,7 @@ export const createNewDocument = (type: DocumentType = 'dokumentasi'): DocumentD
     contentBlocks: [],
     tables: [],
     signees: [],
+    signatureNewPage: true,
     suratResmi: { ...DEFAULT_SURAT_RESMI },
     status: 'draft',
     createdAt: new Date().toISOString(),

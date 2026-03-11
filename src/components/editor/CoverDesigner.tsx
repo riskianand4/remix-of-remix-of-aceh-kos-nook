@@ -292,13 +292,13 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
                 style={{
                   fontSize: `${Math.max(7, el.fontSize / 2.5)}px`,
                   fontWeight: el.bold ? 'bold' : 'normal',
+                  color: el.color || '#000000',
                   whiteSpace: 'pre-wrap',
                   wordWrap: 'break-word',
                   textAlign: 'center',
                   lineHeight: 1.3,
                   margin: 0,
                 }}
-                className="text-foreground"
               >
                 {el.text || '...'}
               </p>
@@ -314,9 +314,9 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
                 <tbody>
                   {(tbl.rows || []).map((row, i) => (
                     <tr key={i}>
-                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', textAlign: 'left', whiteSpace: 'nowrap', }}>{row.key}</td>
-                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, padding: '0 3px', whiteSpace: 'nowrap' }}>:</td>
-                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', textAlign: 'left' }}>{row.value || '...'}</td>
+                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', color: tbl.color || '#000000', textAlign: 'left', whiteSpace: 'nowrap', }}>{row.key}</td>
+                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, padding: '0 3px', color: tbl.color || '#000000', whiteSpace: 'nowrap' }}>:</td>
+                      <td style={{ fontSize: `${Math.max(6, (tbl.fontSize || 12) / 2.5)}px`, fontWeight: tbl.bold ? 'bold' : 'normal', color: tbl.color || '#000000', textAlign: 'left' }}>{row.value || '...'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -386,6 +386,10 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
             <div className="space-y-1">
               <Label className="text-xs">Lebar ({selectedText.width || 80}%)</Label>
               <Slider value={[selectedText.width || 80]} min={10} max={100} step={5} onValueChange={([v]) => updateTextElement(selectedText.id, { width: v })} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Warna Teks</Label>
+              <Input type="color" value={selectedText.color || '#000000'} onChange={(e) => updateTextElement(selectedText.id, { color: e.target.value })} className="h-8 w-16 p-1" />
             </div>
           </div>
           <p className="text-[10px] text-muted-foreground">X: {Math.round(selectedText.pos.x)}%, Y: {Math.round(selectedText.pos.y)}%</p>
@@ -472,6 +476,10 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
           <div className="space-y-1">
             <Label className="text-xs">Lebar Kolom Label ({selectedTable.keyWidth || 35}%)</Label>
             <Slider value={[selectedTable.keyWidth || 35]} min={10} max={60} step={5} onValueChange={([v]) => updateTableElement(selectedTable.id, { keyWidth: v })} />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Warna Teks</Label>
+            <Input type="color" value={selectedTable.color || '#000000'} onChange={(e) => updateTableElement(selectedTable.id, { color: e.target.value })} className="h-8 w-16 p-1" />
           </div>
           <p className="text-[10px] text-muted-foreground">X: {Math.round(selectedTable.pos.x)}%, Y: {Math.round(selectedTable.pos.y)}%</p>
         </div>

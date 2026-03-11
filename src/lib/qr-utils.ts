@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api').replace(/^['"]|['"]$/g, '');
 
 export async function generateQrDataUrl(text: string, size = 200): Promise<string> {
   try {

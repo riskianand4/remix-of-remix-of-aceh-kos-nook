@@ -406,10 +406,11 @@ function generateDokumentasiHtml(doc: DocumentData, qrDataUrl: string): string {
     const textElementsHtml = (layout.textElements || [])
       .map((el) => {
         const elWidth = el.width || 80;
+        const elColor = el.color || '#000000';
         const textHtml = escapeHtml(el.text.trim()).replace(/\n/g, "<br/>");
         return `
       <div class="cover-element" style="left:${el.pos.x}%;top:${el.pos.y}%;width:${elWidth}%;">
-        <p style="font-size:${el.fontSize}pt;font-weight:${el.bold ? "bold" : "normal"};color:${theme.bodyColor};font-family:${theme.fontFamily};line-height:1.3;margin:0;word-wrap:break-word;text-align:center;">
+        <p style="font-size:${el.fontSize}pt;font-weight:${el.bold ? "bold" : "normal"};color:${elColor};font-family:${theme.fontFamily};line-height:1.3;margin:0;word-wrap:break-word;text-align:center;">
           ${textHtml}
         </p>
       </div>
@@ -437,9 +438,9 @@ function generateDokumentasiHtml(doc: DocumentData, qrDataUrl: string): string {
           .map(
             (r) => `
         <tr>
-          <td class="cover-table-key" style="width:${keyW}%;font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${theme.bodyColor};">${escapeHtml(r.key)}</td>
-          <td class="cover-table-sep" style="font-size:${tbl.fontSize || 12}pt;font-family:${theme.fontFamily};color:${theme.bodyColor};">:</td>
-          <td class="cover-table-val" style="font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${theme.bodyColor};">${escapeHtml(r.value)}</td>
+          <td class="cover-table-key" style="width:${keyW}%;font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${tbl.color || '#000000'};">${escapeHtml(r.key)}</td>
+          <td class="cover-table-sep" style="font-size:${tbl.fontSize || 12}pt;font-family:${theme.fontFamily};color:${tbl.color || '#000000'};">:</td>
+          <td class="cover-table-val" style="font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${tbl.color || '#000000'};">${escapeHtml(r.value)}</td>
         </tr>
       `,
           )
@@ -698,28 +699,59 @@ const kopBlock = hasKop
         const sigSize = s.signatureSize || 80;
         const stpSize = s.stampSize || 100;
         const containerH = Math.max(sigSize, stpSize) + 10;
+        const titleAboveHtml = s.titleAbove
+          ? s.titleAbove
+              .split("\n")
+              .map(
+                (line) =>
+                  `<p class="signee-title-above">${escapeHtml(line)}</p>`,
+              )
+              .join("")
+          : "";
         return `
       <div class="signee-block">
+        ${titleAboveHtml}
         <div class="signee-images" style="min-height:${containerH}px;overflow:visible;">
           ${s.stampDataUrl ? `<img src="${s.stampDataUrl}" class="stamp-image" style="max-height:${stpSize}px;" />` : ""}
           ${s.signatureDataUrl ? `<img src="${s.signatureDataUrl}" class="signature-image" style="max-height:${sigSize}px;" />` : ""}
         </div>
+        <div class="signee-line"></div>
         <p class="signee-name">${escapeHtml(s.name || "_______________")}</p>
         <p class="signee-role">${escapeHtml(s.role || "")}</p>
+        ${s.nip ? `<p class="signee-nip">${escapeHtml(s.nip)}</p>` : ""}
       </div>
     `;
       })
       .join("");
 
-    pages.push(`
-      <div class="page" data-section="signatures">
-        ${watermarkHtml}
-        ${kopTop}
-        <div class="signatures-container">${signeesHtml}</div>
-        ${doc.qrEnabled !== false && doc.docCode ? buildQrBlock(doc.docCode, qrDataUrl) : ""}
-        ${kopBottom}
-      </div>
-    `);
+    const sigContent = `<div class="signatures-container">${signeesHtml}</div>
+        ${doc.qrEnabled !== false && doc.docCode ? buildQrBlock(doc.docCode, qrDataUrl) : ""}`;
+
+    if (doc.signatureNewPage !== false) {
+      // New page for signatures (default)
+      pages.push(`
+        <div class="page" data-section="signatures">
+          ${watermarkHtml}
+          ${kopTop}
+          ${sigContent}
+          ${kopBottom}
+        </div>
+      `);
+    } else {
+      // Append to last page if possible
+      if (pages.length > 0) {
+        const lastPage = pages[pages.length - 1];
+        // Insert before the closing kopBottom + </div>
+        const insertPoint = lastPage.lastIndexOf('</div>');
+        if (insertPoint > -1) {
+          pages[pages.length - 1] = lastPage.slice(0, insertPoint) + sigContent + lastPage.slice(insertPoint);
+        } else {
+          pages.push(`<div class="page" data-section="signatures">${watermarkHtml}${kopTop}${sigContent}${kopBottom}</div>`);
+        }
+      } else {
+        pages.push(`<div class="page" data-section="signatures">${watermarkHtml}${kopTop}${sigContent}${kopBottom}</div>`);
+      }
+    }
   }
 
   // Calculate page numbers for TOC
@@ -852,7 +884,8 @@ const kopBlock = hasKop
     counter-increment: page-num;
   }
   @media print {
-    .page { padding: 0; }
+    .page { padding: 0; min-height: auto; overflow: visible; }
+    .page:last-child { page-break-after: auto; }
   }
   .page:last-child { page-break-after: auto; }
 
@@ -1061,6 +1094,8 @@ const kopBlock = hasKop
   .signee-line { border-top: 1px solid ${theme.bodyColor}; margin-bottom: 0px; }
   .signee-name { font-weight: bold; font-size: 11pt; }
   .signee-role { font-size: 9pt; color: ${theme.subtitleColor}; }
+  .signee-nip { font-size: 9pt; color: #444; margin-top: 2px; }
+  .signee-title-above { font-size: 10pt; margin-bottom: 2px; }
 
   .qr-verification {
     position: absolute; bottom: 8mm; left: 8mm;

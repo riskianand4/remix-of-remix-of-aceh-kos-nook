@@ -11,6 +11,7 @@ import DraggableList, { DragHandle } from '@/components/editor/DraggableList';
 import ConfirmDialog from '@/components/editor/ConfirmDialog';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 
 interface Props {
   doc: DocumentData;
@@ -61,6 +62,17 @@ export default function StepSignatures({ doc, updateDoc }: Props) {
         <Button onClick={addSignee} className="gap-2">
           <Plus className="h-4 w-4" /> Tambah Penanda Tangan
         </Button>
+      </div>
+
+      <div className="flex items-center gap-3 rounded-md border p-3 bg-muted/30">
+        <Switch
+          id="signatureNewPage"
+          checked={doc.signatureNewPage !== false}
+          onCheckedChange={(checked) => updateDoc({ signatureNewPage: checked })}
+        />
+        <Label htmlFor="signatureNewPage" className="text-sm cursor-pointer">
+          Tanda tangan di halaman baru
+        </Label>
       </div>
 
       {doc.signees.length === 0 && (
