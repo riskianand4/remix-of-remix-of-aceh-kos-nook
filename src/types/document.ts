@@ -88,6 +88,7 @@ export interface CoverTextElement {
   text: string;
   fontSize: number; // pt
   bold: boolean;
+  color?: string; // hex color, default '#000000'
   pos: CoverElementPos;
   width: number; // percentage 10-100, default 80
 }
