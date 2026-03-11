@@ -387,6 +387,10 @@ export default function CoverDesigner({ doc, updateDoc }: Props) {
               <Label className="text-xs">Lebar ({selectedText.width || 80}%)</Label>
               <Slider value={[selectedText.width || 80]} min={10} max={100} step={5} onValueChange={([v]) => updateTextElement(selectedText.id, { width: v })} />
             </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Warna Teks</Label>
+              <Input type="color" value={selectedText.color || '#000000'} onChange={(e) => updateTextElement(selectedText.id, { color: e.target.value })} className="h-8 w-16 p-1" />
+            </div>
           </div>
           <p className="text-[10px] text-muted-foreground">X: {Math.round(selectedText.pos.x)}%, Y: {Math.round(selectedText.pos.y)}%</p>
         </div>
