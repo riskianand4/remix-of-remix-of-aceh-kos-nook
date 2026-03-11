@@ -1,6 +1,7 @@
 import { DocumentData } from '@/types/document';
+import { toast } from '@/hooks/use-toast';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api').replace(/^['"]|['"]$/g, '');
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -8,6 +9,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     ...options,
   });
   if (!res.ok) {
+    if (res.status === 429) {
+      toast({ title: 'Terlalu banyak permintaan', description: 'Silakan coba beberapa saat lagi.', variant: 'destructive' });
+    }
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || `Request failed: ${res.status}`);
   }

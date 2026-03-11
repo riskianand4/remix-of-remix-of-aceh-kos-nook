@@ -324,6 +324,7 @@ export const createNewDocument = (type: DocumentType = 'dokumentasi'): DocumentD
     contentBlocks: [],
     tables: [],
     signees: [],
+    signatureNewPage: true,
     suratResmi: { ...DEFAULT_SURAT_RESMI },
     status: 'draft',
     createdAt: new Date().toISOString(),
