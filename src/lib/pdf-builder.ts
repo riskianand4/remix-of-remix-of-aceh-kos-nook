@@ -884,7 +884,8 @@ const kopBlock = hasKop
     counter-increment: page-num;
   }
   @media print {
-    .page { padding: 0; }
+    .page { padding: 0; min-height: auto; overflow: visible; }
+    .page:last-child { page-break-after: auto; }
   }
   .page:last-child { page-break-after: auto; }
 
