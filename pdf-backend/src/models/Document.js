@@ -127,6 +127,7 @@ const DocumentSchema = new mongoose.Schema({
   contentBlocks: [mongoose.Schema.Types.Mixed],
   tables: [TableSchema],
   signees: [SigneeSchema],
+  signatureNewPage: { type: Boolean, default: true },
   customTheme: { type: CustomThemeSchema, default: () => ({}) },
   coverLineSpacing: { type: Number, default: 1.5 },
   contentLineSpacing: { type: Number, default: 1.5 },

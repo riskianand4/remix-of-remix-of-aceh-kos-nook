@@ -1094,6 +1094,8 @@ const kopBlock = hasKop
   .signee-line { border-top: 1px solid ${theme.bodyColor}; margin-bottom: 0px; }
   .signee-name { font-weight: bold; font-size: 11pt; }
   .signee-role { font-size: 9pt; color: ${theme.subtitleColor}; }
+  .signee-nip { font-size: 9pt; color: #444; margin-top: 2px; }
+  .signee-title-above { font-size: 10pt; margin-bottom: 2px; }
 
   .qr-verification {
     position: absolute; bottom: 8mm; left: 8mm;
