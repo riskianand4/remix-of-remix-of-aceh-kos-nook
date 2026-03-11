@@ -112,6 +112,7 @@ export interface CoverTableElement {
   width: number; // percentage 10-100, default 60
   fontSize: number; // pt, default 12
   bold: boolean;
+  color?: string; // hex color, default '#000000'
   keyWidth: number; // percentage of table width for key column, default 35
 }
 
