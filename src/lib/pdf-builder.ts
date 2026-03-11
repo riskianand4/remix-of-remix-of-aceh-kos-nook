@@ -438,9 +438,9 @@ function generateDokumentasiHtml(doc: DocumentData, qrDataUrl: string): string {
           .map(
             (r) => `
         <tr>
-          <td class="cover-table-key" style="width:${keyW}%;font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${theme.bodyColor};">${escapeHtml(r.key)}</td>
-          <td class="cover-table-sep" style="font-size:${tbl.fontSize || 12}pt;font-family:${theme.fontFamily};color:${theme.bodyColor};">:</td>
-          <td class="cover-table-val" style="font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${theme.bodyColor};">${escapeHtml(r.value)}</td>
+          <td class="cover-table-key" style="width:${keyW}%;font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${tbl.color || '#000000'};">${escapeHtml(r.key)}</td>
+          <td class="cover-table-sep" style="font-size:${tbl.fontSize || 12}pt;font-family:${theme.fontFamily};color:${tbl.color || '#000000'};">:</td>
+          <td class="cover-table-val" style="font-size:${tbl.fontSize || 12}pt;font-weight:${tbl.bold ? "bold" : "normal"};font-family:${theme.fontFamily};color:${tbl.color || '#000000'};">${escapeHtml(r.value)}</td>
         </tr>
       `,
           )
