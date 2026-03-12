@@ -31,7 +31,8 @@ import { toast } from '@/hooks/use-toast';
 import { TEMPLATES } from '@/lib/templates';
 import ConfirmDialog from '@/components/editor/ConfirmDialog';
 import { exportDocuments, exportSingleDocument, importDocuments } from '@/lib/export-import';
-
+import ProgressDialog from '@/components/ProgressDialog';
+import { useProgress } from '@/hooks/useProgress';
 import OnboardingWelcome from '@/components/OnboardingWelcome';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { createDocument, updateDocument } from '@/lib/api';
