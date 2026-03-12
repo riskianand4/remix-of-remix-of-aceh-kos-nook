@@ -39,6 +39,8 @@ import BackendStatus from '@/components/BackendStatus';
 import LivePreview from '@/components/editor/LivePreview';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import ShareDialog from '@/components/editor/ShareDialog';
+import ProgressDialog from '@/components/ProgressDialog';
+import { useProgress } from '@/hooks/useProgress';
 
 // All steps for general documents
 const ALL_STEPS = [
@@ -92,6 +94,7 @@ export default function DocumentEditor() {
   const onboarding = useOnboarding();
   const history = useHistory<DocumentData>();
   const versionInterval = useRef<NodeJS.Timeout>();
+  const progress = useProgress();
 
   const STEPS = useMemo(() => doc && isSuratResmi(doc) ? SURAT_RESMI_STEPS : ALL_STEPS, [doc]);
 
@@ -213,14 +216,13 @@ export default function DocumentEditor() {
 
   const handleSave = useCallback(async () => {
     if (doc) {
-      try {
+      await progress.run('Menyimpan dokumen...', async (update) => {
+        update(20);
         await saveDocument(doc);
-        toast({ title: `✓ ${t('editor.saved')}`, duration: 1500 });
-      } catch {
-        toast({ title: 'Gagal menyimpan', variant: 'destructive' });
-      }
+        update(100);
+      });
     }
-  }, [doc, t]);
+  }, [doc, progress]);
 
   const handleStepChange = useCallback((step: number) => {
     if (!doc) return;
@@ -546,9 +548,15 @@ export default function DocumentEditor() {
               <Input value={templateDesc} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemplateDesc(e.target.value)} placeholder="cth: Template standar" />
             </div>
             <Button className="w-full" disabled={!templateName.trim()} onClick={async () => {
-              await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
               setShowSaveTemplate(false);
-              toast({ title: 'Template tersimpan!' });
+              await progress.run('Menyimpan template...', async (update) => {
+                update(30);
+                const ok = await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
+                if (!ok) throw new Error('Gagal menyimpan');
+                update(100);
+                setTemplateName('');
+                setTemplateDesc('');
+              });
             }}>
               Simpan
             </Button>
@@ -557,6 +565,7 @@ export default function DocumentEditor() {
       </Dialog>
 
       <ShareDialog open={showShare} onOpenChange={setShowShare} doc={doc} />
+      <ProgressDialog state={progress.state} />
 
       <OnboardingTour
         show={onboarding.showTour}

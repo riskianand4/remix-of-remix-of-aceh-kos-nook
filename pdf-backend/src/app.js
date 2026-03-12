@@ -7,6 +7,7 @@ const rateLimiter = require('./middleware/rateLimiter');
 const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 const routes = require('./routes');
+const shareRoutes = require('./routes/shareRoutes');
 
 const app = express();
 
@@ -16,11 +17,16 @@ app.use(compression());
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: config.BODY_LIMIT }));
 
-// Logging & rate limiting
+// Logging
 app.use(requestLogger);
+
+// Public routes (no auth, no rate limit) — review/share endpoints
+app.use('/api', shareRoutes);
+
+// Rate limiting for protected routes
 app.use('/api', rateLimiter);
 
-// Routes
+// Protected routes
 app.use('/api', routes);
 
 // Error handler

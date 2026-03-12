@@ -31,7 +31,8 @@ import { toast } from '@/hooks/use-toast';
 import { TEMPLATES } from '@/lib/templates';
 import ConfirmDialog from '@/components/editor/ConfirmDialog';
 import { exportDocuments, exportSingleDocument, importDocuments } from '@/lib/export-import';
-
+import ProgressDialog from '@/components/ProgressDialog';
+import { useProgress } from '@/hooks/useProgress';
 import OnboardingWelcome from '@/components/OnboardingWelcome';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { createDocument, updateDocument } from '@/lib/api';
@@ -55,6 +56,7 @@ export default function Dashboard() {
   const [bulkMode, setBulkMode] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
   const onboarding = useOnboarding();
+  const progress = useProgress();
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
   const [saveTemplateTarget, setSaveTemplateTarget] = useState<string | null>(null);
   const [templateName, setTemplateName] = useState('');
@@ -178,13 +180,16 @@ export default function Dashboard() {
     if (!saveTemplateTarget || !templateName.trim()) return;
     const doc = documents.find(d => d.id === saveTemplateTarget);
     if (!doc) return;
-    await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
-    const tmpls = await getCustomTemplates();
-    setCustomTemplates(tmpls);
     setSaveTemplateTarget(null);
-    setTemplateName('');
-    setTemplateDesc('');
-    toast({ title: 'Template tersimpan!' });
+    await progress.run('Menyimpan template...', async (update) => {
+      update(30);
+      await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
+      update(80);
+      const tmpls = await getCustomTemplates();
+      setCustomTemplates(tmpls);
+      setTemplateName('');
+      setTemplateDesc('');
+    });
   };
 
   const handleDeleteCustomTemplate = async (id: string) => {
@@ -195,10 +200,13 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteDocument(id);
-    await loadData();
     setDeleteTarget(null);
-    toast({ title: t('dashboard.docDeleted') });
+    await progress.run('Menghapus dokumen...', async (update) => {
+      update(30);
+      await deleteDocument(id);
+      update(70);
+      await loadData();
+    });
   };
 
   const handleDuplicate = async (id: string) => {
@@ -219,22 +227,25 @@ export default function Dashboard() {
     setRenameTarget(null);
   };
 
-  const handleExportAll = () => {
-    exportDocuments(documents);
-    toast({ title: t('dashboard.docsExported', { count: documents.length }) });
+  const handleExportAll = async () => {
+    await progress.run('Mengekspor dokumen...', async (update) => {
+      update(30);
+      exportDocuments(documents);
+      update(100);
+    });
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const count = await importDocuments(file);
-      await loadData();
-      toast({ title: t('dashboard.docsImported', { count }) });
-    } catch (err: any) {
-      toast({ title: t('dashboard.importFailed'), description: err.message, variant: 'destructive' });
-    }
     e.target.value = '';
+    await progress.run('Mengimpor dokumen...', async (update) => {
+      update(20);
+      await importDocuments(file);
+      update(70);
+      await loadData();
+      update(100);
+    });
   };
 
   // Bulk operations
@@ -685,6 +696,7 @@ export default function Dashboard() {
         description={t('dashboard.deleteDocDesc')}
         onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
       />
+      <ProgressDialog state={progress.state} />
     </div>
   );
 }
