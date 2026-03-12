@@ -548,9 +548,15 @@ export default function DocumentEditor() {
               <Input value={templateDesc} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemplateDesc(e.target.value)} placeholder="cth: Template standar" />
             </div>
             <Button className="w-full" disabled={!templateName.trim()} onClick={async () => {
-              await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
               setShowSaveTemplate(false);
-              toast({ title: 'Template tersimpan!' });
+              await progress.run('Menyimpan template...', async (update) => {
+                update(30);
+                const ok = await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
+                if (!ok) throw new Error('Gagal menyimpan');
+                update(100);
+                setTemplateName('');
+                setTemplateDesc('');
+              });
             }}>
               Simpan
             </Button>
