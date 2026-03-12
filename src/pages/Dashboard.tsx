@@ -180,13 +180,16 @@ export default function Dashboard() {
     if (!saveTemplateTarget || !templateName.trim()) return;
     const doc = documents.find(d => d.id === saveTemplateTarget);
     if (!doc) return;
-    await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
-    const tmpls = await getCustomTemplates();
-    setCustomTemplates(tmpls);
     setSaveTemplateTarget(null);
-    setTemplateName('');
-    setTemplateDesc('');
-    toast({ title: 'Template tersimpan!' });
+    await progress.run('Menyimpan template...', async (update) => {
+      update(30);
+      await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
+      update(80);
+      const tmpls = await getCustomTemplates();
+      setCustomTemplates(tmpls);
+      setTemplateName('');
+      setTemplateDesc('');
+    });
   };
 
   const handleDeleteCustomTemplate = async (id: string) => {
