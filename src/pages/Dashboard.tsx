@@ -696,6 +696,7 @@ export default function Dashboard() {
         description={t('dashboard.deleteDocDesc')}
         onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
       />
+      <ProgressDialog state={progress.state} />
     </div>
   );
 }
