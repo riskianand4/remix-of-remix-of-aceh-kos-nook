@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ShareLinkSchema = new mongoose.Schema({
-  documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document', required: true, index: true },
+  documentId: { type: String, ref: 'Document', required: true, index: true },
   code: { type: String, required: true, index: true },
   accessCode: { type: String, required: true },
   createdBy: { type: String, default: '' },
