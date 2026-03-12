@@ -200,10 +200,13 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteDocument(id);
-    await loadData();
     setDeleteTarget(null);
-    toast({ title: t('dashboard.docDeleted') });
+    await progress.run('Menghapus dokumen...', async (update) => {
+      update(30);
+      await deleteDocument(id);
+      update(70);
+      await loadData();
+    });
   };
 
   const handleDuplicate = async (id: string) => {
