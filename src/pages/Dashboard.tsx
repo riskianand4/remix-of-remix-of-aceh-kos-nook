@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [bulkMode, setBulkMode] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
   const onboarding = useOnboarding();
+  const progress = useProgress();
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
   const [saveTemplateTarget, setSaveTemplateTarget] = useState<string | null>(null);
   const [templateName, setTemplateName] = useState('');
