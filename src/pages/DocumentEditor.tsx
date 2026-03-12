@@ -94,6 +94,7 @@ export default function DocumentEditor() {
   const onboarding = useOnboarding();
   const history = useHistory<DocumentData>();
   const versionInterval = useRef<NodeJS.Timeout>();
+  const progress = useProgress();
 
   const STEPS = useMemo(() => doc && isSuratResmi(doc) ? SURAT_RESMI_STEPS : ALL_STEPS, [doc]);
 
