@@ -216,14 +216,13 @@ export default function DocumentEditor() {
 
   const handleSave = useCallback(async () => {
     if (doc) {
-      try {
+      await progress.run('Menyimpan dokumen...', async (update) => {
+        update(20);
         await saveDocument(doc);
-        toast({ title: `✓ ${t('editor.saved')}`, duration: 1500 });
-      } catch {
-        toast({ title: 'Gagal menyimpan', variant: 'destructive' });
-      }
+        update(100);
+      });
     }
-  }, [doc, t]);
+  }, [doc, progress]);
 
   const handleStepChange = useCallback((step: number) => {
     if (!doc) return;
