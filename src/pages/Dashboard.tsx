@@ -238,14 +238,14 @@ export default function Dashboard() {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const count = await importDocuments(file);
-      await loadData();
-      toast({ title: t('dashboard.docsImported', { count }) });
-    } catch (err: any) {
-      toast({ title: t('dashboard.importFailed'), description: err.message, variant: 'destructive' });
-    }
     e.target.value = '';
+    await progress.run('Mengimpor dokumen...', async (update) => {
+      update(20);
+      await importDocuments(file);
+      update(70);
+      await loadData();
+      update(100);
+    });
   };
 
   // Bulk operations
