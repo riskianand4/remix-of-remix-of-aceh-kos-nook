@@ -227,9 +227,12 @@ export default function Dashboard() {
     setRenameTarget(null);
   };
 
-  const handleExportAll = () => {
-    exportDocuments(documents);
-    toast({ title: t('dashboard.docsExported', { count: documents.length }) });
+  const handleExportAll = async () => {
+    await progress.run('Mengekspor dokumen...', async (update) => {
+      update(30);
+      exportDocuments(documents);
+      update(100);
+    });
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
