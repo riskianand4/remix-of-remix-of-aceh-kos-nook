@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Eye, Download, Loader2, AlertCircle, FileCode, Ruler, Save } from 'lucide-react';
+import { Download, Loader2, AlertCircle, FileCode, Ruler, Save } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { generatePdfHtml } from '@/lib/pdf-builder';
@@ -18,6 +18,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import ProgressDialog from '@/components/ProgressDialog';
+import { useProgress } from '@/hooks/useProgress';
 
 interface Props {
   doc: DocumentData;
@@ -27,12 +29,10 @@ interface Props {
 
 export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
   const { t } = useTranslation();
-  const [generating, setGenerating] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDesc, setTemplateDesc] = useState('');
+  const progress = useProgress();
 
   const margins = doc.margins || { top: 20, bottom: 25, left: 15, right: 15 };
   const canGenerate = doc.title.trim().length > 0 
@@ -42,18 +42,22 @@ export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
     updateDoc({ margins: { ...margins, [key]: value } });
   };
 
-
   const handleExportHtml = () => {
-    exportAsHtml(doc);
-    toast({ title: `📄 ${t('preview.htmlExported')}` });
+    progress.run('Mengekspor HTML...', async (update) => {
+      update(30);
+      exportAsHtml(doc);
+      update(100);
+    });
   };
 
   const handleGenerateBackend = async () => {
     if (!canGenerate) return;
-    setGenerating(true);
-    try {
+    await progress.run('Mengunduh PDF...', async (update) => {
+      update(10);
       const html = await generatePdfHtml(doc);
+      update(40);
       const blob = await generatePdf(html, doc.footerEnabled);
+      update(80);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -61,29 +65,21 @@ export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
       a.click();
       URL.revokeObjectURL(url);
       updateDoc({ status: 'finished' });
-      toast({ title: t('preview.pdfGenerated') });
-    } catch {
-      toast({
-        title: t('preview.backendUnavailable'),
-        description: t('preview.backendUnavailableDesc'),
-        variant: 'destructive',
-      });
-    } finally {
-      setGenerating(false);
-    }
+      update(100);
+    });
   };
 
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) return;
-    const ok = await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
-    if (ok) {
-      setShowSaveTemplate(false);
+    setShowSaveTemplate(false);
+    await progress.run('Menyimpan template...', async (update) => {
+      update(30);
+      const ok = await saveCustomTemplate(doc, templateName.trim(), templateDesc.trim());
+      update(90);
+      if (!ok) throw new Error('Gagal menyimpan template');
       setTemplateName('');
       setTemplateDesc('');
-      toast({ title: '✅ Template tersimpan!' });
-    } else {
-      toast({ title: 'Gagal menyimpan template', variant: 'destructive' });
-    }
+    });
   };
 
   return (
@@ -130,7 +126,6 @@ export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
- 
         <Button variant="outline" onClick={handleExportHtml} disabled={!canGenerate} className="gap-2">
           <FileCode className="h-4 w-4" /> {t('preview.exportHtml')}
         </Button>
@@ -142,11 +137,11 @@ export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
                 <Button
                   variant="default"
                   onClick={handleGenerateBackend}
-                  disabled={generating || !canGenerate}
+                  disabled={!canGenerate}
                   className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25"
                 >
-                  {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                  {generating ? t('preview.generating') : t('preview.generateBackend')}
+                  <Download className="h-4 w-4" />
+                  {t('preview.generateBackend')}
                 </Button>
               </span>
             </TooltipTrigger>
@@ -168,23 +163,6 @@ export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
           <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: `<strong>💡 Tip:</strong> ${t('preview.tip')}` }} />
         </CardContent>
       </Card>
-
-      {showPreview && (
-        <Card className="animate-fade-in">
-          <CardContent className="p-0">
-            <div className="border-b bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
-              {t('preview.docPreview')}
-            </div>
-            <div className="overflow-auto bg-white p-0" style={{ maxHeight: '80vh' }}>
-              <iframe
-                srcDoc={previewHtml}
-                className="h-[800px] w-full border-0"
-                title="PDF Preview"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Save as Template Dialog */}
       <Dialog open={showSaveTemplate} onOpenChange={setShowSaveTemplate}>
@@ -208,6 +186,8 @@ export default function StepPreview({ doc, updateDoc, onStepChange }: Props) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ProgressDialog state={progress.state} />
     </div>
   );
 }

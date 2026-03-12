@@ -565,6 +565,7 @@ export default function DocumentEditor() {
       </Dialog>
 
       <ShareDialog open={showShare} onOpenChange={setShowShare} doc={doc} />
+      <ProgressDialog state={progress.state} />
 
       <OnboardingTour
         show={onboarding.showTour}
