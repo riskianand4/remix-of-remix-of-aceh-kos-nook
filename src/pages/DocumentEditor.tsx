@@ -39,6 +39,8 @@ import BackendStatus from '@/components/BackendStatus';
 import LivePreview from '@/components/editor/LivePreview';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import ShareDialog from '@/components/editor/ShareDialog';
+import ProgressDialog from '@/components/ProgressDialog';
+import { useProgress } from '@/hooks/useProgress';
 
 // All steps for general documents
 const ALL_STEPS = [
